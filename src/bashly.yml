@@ -1,0 +1,21 @@
+name: gs
+help: A bash utility for GraphScope
+version: 0.1.0
+
+commands:
+- name: dev
+  alias: d
+  help: Open a develop environment with docker.
+
+  flags:
+  - long: --local
+    short: -l
+    arg: local
+    help: Local path to the source code of GraphScope.
+
+  examples:
+  - graphscope dev
+  - graphscope dev --local /home/bar/graphscope
+
+  dependencies:
+  - docker
