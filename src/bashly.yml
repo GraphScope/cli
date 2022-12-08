@@ -2,7 +2,38 @@ name: gs
 help: A bash utility for GraphScope
 version: 0.1.0
 
+footer: |
+  GraphScope is opensourced at https://github.com/alibaba/GraphScope
+  by DAMO Acadamy, Alibaba Group.
+
 commands:
+
+- name: build
+  help: Build GraphScope on local.
+
+- name: build-image
+  help: Build GraphScope docker images.
+
+  args:
+  - name: image
+    help: Images to build.
+    # Whitelist + required
+    allowed: [graphscope-dev-base, graphscope-dev]
+    required: true
+  
+  flags:
+  - long: --cn
+    arg: cn
+    help: Whether to use CN located mirrors to speed up download.
+
+  examples:
+  - gs build-image graphscope-dev
+  - gs build-image graphscope-dev -cn
+  - gs build-image analytical
+
+  dependencies:
+  - docker
+
 - name: dev
   alias: d
   help: Open a develop environment with docker.
@@ -14,8 +45,27 @@ commands:
     help: Local path to the source code of GraphScope.
 
   examples:
-  - graphscope dev
-  - graphscope dev --local /home/bar/graphscope
+  - gs dev
+  - gs dev --local /home/bar/graphscope
 
   dependencies:
   - docker
+
+- name: install-deps
+  help: Install dependencies on local machine.
+
+  args:
+  - name: type
+    help: dependencies for development or client
+    # whitelist + required
+    allowed: [dev, client]
+    required: true
+
+  flags:
+  - long: --cn
+    help: Whether to use CN located mirrors to speed up download.
+
+  examples:
+  - gs install-deps client
+  - gs install-deps dev
+  - gs install-deps dev --cn

@@ -8,9 +8,11 @@ else
     local=`pwd`
 fi
 
-docker pull registry.cn-hongkong.aliyuncs.com/graphscope/graphscope-dev
+#docker pull graphscope/graphscope-dev
 docker run \
-    -v $local:/home/graphscope \
     --net=host \
-    -it registry.cn-hongkong.aliyuncs.com/graphscope/graphscope-dev \
+    -it graphscope/graphscope-dev \
     /bin/bash
+
+
+    # -v $local:/home/graphscope/workspace 
