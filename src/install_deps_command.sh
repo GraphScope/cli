@@ -1,5 +1,5 @@
 inspect_args
-type=${args[--type]}
+type=${args[type]}
 cn=${args[--cn]}
 
 readonly OS=$(get_os_version)
@@ -27,26 +27,26 @@ if [[ -n $cn ]]; then
 fi
 
 check_os_compatibility() {
-  if [[ "${PLATFORM}" != *"Ubuntu"* && "${PLATFORM}" != *"CentOS"* && "${PLATFORM}" != *"Darwin"* ]]; then
+  if [[ "${OS_PLATFORM}" != *"Ubuntu"* && "${OS_PLATFORM}" != *"CentOS"* && "${OS_PLATFORM}" != *"Darwin"* ]]; then
     err "The script is only support platforms of Ubuntu/CentOS/macOS"
     exit 1
   fi
 
-  if [[ "${PLATFORM}" == *"Ubuntu"* && "$(echo ${OS_VERSION} | sed 's/\([0-9]\)\([0-9]\).*/\1\2/')" -lt "20" ]]; then
+  if [[ "${OS_PLATFORM}" == *"Ubuntu"* && "$(echo ${OS_VERSION} | sed 's/\([0-9]\)\([0-9]\).*/\1\2/')" -lt "20" ]]; then
     err "The version of Ubuntu is ${OS_VERSION}. This script requires Ubuntu 20 or greater."
     exit 1
   fi
 
-  if [[ "${PLATFORM}" == *"CentOS"* && "${OS_VERSION}" -lt "8" ]]; then
+  if [[ "${OS_PLATFORM}" == *"CentOS"* && "${OS_VERSION}" -lt "8" ]]; then
     err "The version of CentOS is ${OS_VERSION}. This script requires CentOS 8 or greater."
     exit 1
   fi
 
-  log "Runing on ${PLATFORM} ${OS_VERSION}"
+  log "Runing on ${OS_PLATFORM} ${OS_VERSION}"
 }
 
 init_basic_packages() {
-  if [[ "${PLATFORM}" == *"Ubuntu"* ]]; then
+  if [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
     BASIC_PACKGES_TO_INSTALL=(
       build-essential
       wget
@@ -88,7 +88,7 @@ init_basic_packages() {
       rapidjson-dev
       libmsgpack-dev
     )
-  elif [[ "${PLATFORM}" == *"CentOS"* ]]; then
+  elif [[ "${OS_PLATFORM}" == *"CentOS"* ]]; then
     BASIC_PACKGES_TO_INSTALL=(
       autoconf
       automake
@@ -587,3 +587,6 @@ install_deps_for_client(){
     echo "TODO"
     # install python..
 }
+
+# run subcommand with the type
+install_deps_for_${type}
