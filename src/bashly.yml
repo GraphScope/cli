@@ -73,10 +73,12 @@ commands:
   - long: --no-grape-v6d
     short: -n
     help: Install deps but not grape/v6d, for building a docker images relatively stable.
+    conflicts: [--only-grape-v6d]
 
   - long: --only-grape-v6d
     short: -o
     help: Only install latest grape and v6d.
+    conflicts: [--no-grape-v6d]
 
   dependencies:
   - wget # TODO: ossutil? I think wget is better.
@@ -86,7 +88,7 @@ commands:
   - gs install-deps client
   - gs install-deps dev
   - gs install-deps dev --cn
-  - gs install-deps dev --from-tar ~/Downloads/gs-all-deps
+  - gs install-deps dev --from-local ~/Downloads/gs-all-deps
   - gs install-deps dev --no-grape-v6d
   - gs install-deps dev --only-grape-v6d
   

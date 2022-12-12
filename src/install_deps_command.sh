@@ -1,6 +1,9 @@
 inspect_args
 type=${args[type]}
+from-local=${args[from-local]}
 cn=${args[--cn]}
+only-grape-v6d=${args[--only-grape-v6d]}
+no-grape-v6d=${args[--no-grape-v6d]}
 
 readonly OS=$(get_os_version)
 readonly OS_PLATFORM=${OS%-*}
