@@ -65,7 +65,17 @@ commands:
   - long: --cn
     help: Whether to use CN located mirrors to speed up download.
 
+  - long: --from-local
+    short: -l
+    arg: from-local
+    help: Install deps from a local location. If the location is empty, it will download a tar with all deps from Web (via oss).
+  
+  dependencies:
+  - wget # TODO: ossutil? I think wget is better.
+
+
   examples:
   - gs install-deps client
   - gs install-deps dev
   - gs install-deps dev --cn
+  - gs install-deps dev --from-tar ~/Downloads/gs-all-deps

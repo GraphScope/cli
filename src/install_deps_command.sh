@@ -10,6 +10,8 @@ readonly OUTPUT_ENV_FILE="${HOME}/.graphscope_env"
 DEPS_PREFIX="/usr/local"
 BASIC_PACKGES_TO_INSTALL=
 
+# TODO: remove these 3 lines, seperate install grape/vineyard script to lib, 
+# always intall the latest, in order to support graphscope-dev-base and graphscope-dev
 readonly GRAPE_BRANCH="master" # libgrape-lite branch
 readonly V6D_VERSION="0.11.1"  # vineyard version
 readonly V6D_BRANCH="v0.11.1" # vineyard branch
@@ -265,6 +267,7 @@ check_dependencies() {
   fi
 }
 
+# TODO: move it lib for convenience
 install_libgrape-lite() {
   log "Building and installing libgrape-lite."
 
@@ -285,6 +288,7 @@ install_libgrape-lite() {
   rm -fr /tmp/libgrape-lite
 }
 
+# TODO: move it lib for convenience
 install_vineyard() {
   log "Building and installing vineyard."
   if command -v /usr/local/bin/vineyardd &> /dev/null && \
@@ -337,7 +341,6 @@ install_cppkafka() {
 }
 
 install_dependencies() {
-
   # install dependencies for specific platforms.
   if [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
     sudo apt-get update -y
