@@ -70,6 +70,14 @@ commands:
     arg: from-local
     help: Install deps from a local location. If the location is empty, it will download a tar with all deps from Web (via oss).
   
+  - long: --no-grape-v6d
+    short: -n
+    help: Install deps but not grape/v6d, for building a docker images relatively stable.
+
+  - long: --only-grape-v6d
+    short: -o
+    help: Only install latest grape and v6d.
+
   dependencies:
   - wget # TODO: ossutil? I think wget is better.
 
@@ -79,3 +87,6 @@ commands:
   - gs install-deps dev
   - gs install-deps dev --cn
   - gs install-deps dev --from-tar ~/Downloads/gs-all-deps
+  - gs install-deps dev --no-grape-v6d
+  - gs install-deps dev --only-grape-v6d
+  
