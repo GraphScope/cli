@@ -1,9 +1,16 @@
 inspect_args
 type=${args[type]}
-from-local=${args[from-local]}
+# from-local=${args[--from-local]}
 cn=${args[--cn]}
-only-grape-v6d=${args[--only-grape-v6d]}
-no-grape-v6d=${args[--no-grape-v6d]}
+only_grape_v6d=${args[--only-grape-v6d]}
+# no-grape-v6d=${args[--no-grape-v6d]}
+
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    error "Not running as root."
+    exit 2
+else
+    warning "Please note that I am running as root."
+fi
 
 readonly OS=$(get_os_version)
 readonly OS_PLATFORM=${OS%-*}
@@ -29,6 +36,14 @@ if [[ -n $cn ]]; then
     export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git"
     export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git"
     export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles"
+fi
+
+
+if [[ -n $only_grape_v6d ]]; then
+  echo "$(yellow "Only install libgrape and vineyard.")"
+  install_grape
+  install_vineyard
+  exit 0
 fi
 
 check_os_compatibility() {
@@ -270,50 +285,12 @@ check_dependencies() {
   fi
 }
 
-# TODO: move it lib for convenience
-install_libgrape-lite() {
-  log "Building and installing libgrape-lite."
 
-  if [[ -f "/usr/local/include/grape/grape.h" ]]; then
-    log "libgrape-lite already installed, skip."
-    return 0
+check_and_remove_dir() {
+  if [[ -d $1 ]]; then
+    log "Found $1 exists, remove it."
+    rm -fr $1
   fi
-
-  check_and_remove_dir "/tmp/libgrape-lite"
-  git clone -b ${GRAPE_BRANCH} --single-branch --depth=1 \
-      https://github.com/alibaba/libgrape-lite.git /tmp/libgrape-lite
-  pushd /tmp/libgrape-lite
-  mkdir -p build && cd build
-  cmake ..
-  make -j$(nproc)
-  sudo make install
-  popd
-  rm -fr /tmp/libgrape-lite
-}
-
-# TODO: move it lib for convenience
-install_vineyard() {
-  log "Building and installing vineyard."
-  if command -v /usr/local/bin/vineyardd &> /dev/null && \
-     [[ "$(/usr/local/bin/vineyardd --version 2>&1 | awk -F ' ' '{print $3}')" == "${V6D_VERSION}" ]]; then
-    log "vineyard ${V6D_VERSION} already installed, skip."
-    return 0
-  fi
-
-  check_and_remove_dir "/tmp/v6d"
-  git clone -b ${V6D_BRANCH} --single-branch --depth=1 \
-      https://github.com/v6d-io/v6d.git /tmp/v6d
-  pushd /tmp/v6d
-  git submodule update --init
-  mkdir -p build && pushd build
-  cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} \
-           -DBUILD_SHARED_LIBS=ON \
-           -DBUILD_VINEYARD_TESTS=OFF
-  make -j$(nproc)
-  sudo make install && popd
-  popd
-
-  rm -fr /tmp/v6d
 }
 
 install_cppkafka() {
@@ -337,7 +314,7 @@ install_cppkafka() {
   git submodule update --init
   mkdir -p build && pushd build
   cmake -DCPPKAFKA_DISABLE_TESTS=ON  -DCPPKAFKA_DISABLE_EXAMPLES=ON .. && make -j$(nproc)
-  sudo make install && popd
+  make install && popd
   popd
 
   rm -fr /tmp/cppkafka
@@ -346,10 +323,10 @@ install_cppkafka() {
 install_dependencies() {
   # install dependencies for specific platforms.
   if [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
-    sudo apt-get update -y
+    apt-get update -y
 
     log "Installing packages ${BASIC_PACKGES_TO_INSTALL[*]}"
-    sudo apt-get install -y ${BASIC_PACKGES_TO_INSTALL[*]}
+    apt-get install -y ${BASIC_PACKGES_TO_INSTALL[*]}
 
     if [[ "${packages_to_install[*]}" =~ "rust" ]]; then
       # packages_to_install contains rust
@@ -363,31 +340,31 @@ install_dependencies() {
       log "Installing apache-arrow."
       wget -c https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
         -P /tmp/
-      sudo apt install -y -V /tmp/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
-      sudo apt update -y
-      sudo apt install -y libarrow-dev
+      apt install -y -V /tmp/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
+      apt update -y
+      apt install -y libarrow-dev
       # remove apache-arrow from packages_to_install
       packages_to_install=("${packages_to_install[@]/apache-arrow}")
     fi
 
     if [[ ! -z "${packages_to_install}" ]]; then
       log "Installing packages ${packages_to_install[*]}"
-      sudo apt install -y ${packages_to_install[*]}
+      apt install -y ${packages_to_install[*]}
     fi
 
   elif [[ "${OS_PLATFORM}" == *"CentOS"* ]]; then
-    sudo dnf install -y dnf-plugins-core \
+    dnf install -y dnf-plugins-core \
         https://download-ib01.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
-    sudo dnf config-manager --set-enabled epel
-    sudo dnf config-manager --set-enabled powertools
+    dnf config-manager --set-enabled epel
+    dnf config-manager --set-enabled powertools
 
     log "Instralling packages ${BASIC_PACKGES_TO_INSTALL[*]}"
-    sudo dnf install -y ${BASIC_PACKGES_TO_INSTALL[*]}
+    dnf install -y ${BASIC_PACKGES_TO_INSTALL[*]}
 
     if [[ "${packages_to_install[*]}" =~ "apache-arrow" ]]; then
       log "Installing apache-arrow."
-      sudo dnf install -y libarrow-devel
+      dnf install -y libarrow-devel
       # remove apache-arrow from packages_to_install
       packages_to_install=("${packages_to_install[@]/apache-arrow}")
     fi
@@ -399,7 +376,7 @@ install_dependencies() {
       tar zxvf /tmp/openmpi-4.0.5.tar.gz -C /tmp
       pushd /tmp/openmpi-4.0.5 && ./configure --enable-mpi-cxx
       make -j$(nproc)
-      sudo make install
+      make install
       popd
       rm -fr /tmp/openmpi-4.0.5 /tmp/openmpi-4.0.5.tar.gz
       packages_to_install=("${packages_to_install[@]/openmpi}")
@@ -415,8 +392,8 @@ install_dependencies() {
         -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
       tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz \
         -C /tmp/etcd-download-test --strip-components=1
-      sudo mv /tmp/etcd-download-test/etcd /usr/local/bin/
-      sudo mv /tmp/etcd-download-test/etcdctl /usr/local/bin/
+      mv /tmp/etcd-download-test/etcd /usr/local/bin/
+      mv /tmp/etcd-download-test/etcdctl /usr/local/bin/
       rm -fr /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz /tmp/etcd-download-test
       packages_to_install=("${packages_to_install[@]/etcd}")
     fi
@@ -431,7 +408,7 @@ install_dependencies() {
 
     if [[ ! -z "${packages_to_install}" ]]; then
       log "Installing packages ${packages_to_install[*]}"
-      sudo dnf -y install  ${packages_to_install[*]}
+      dnf -y install  ${packages_to_install[*]}
     fi
 
     log "Installing protobuf v.3.13.0"
@@ -441,13 +418,13 @@ install_dependencies() {
     pushd /tmp/protobuf-3.13.0
     ./configure --enable-shared --disable-static
     make -j$(nproc)
-    sudo make install && ldconfig
+    make install && ldconfig
     popd
     rm -fr /tmp/protobuf-all-3.13.0.tar.gz /tmp/protobuf-3.13.0
 
     log "Installing grpc v1.33.1"
     if [[ -d "/tmp/grpc" ]]; then
-      sudo rm -fr /tmp/grpc
+      rm -fr /tmp/grpc
     fi
     git clone --depth 1 --branch v1.33.1 https://github.com/grpc/grpc.git /tmp/grpc
     pushd /tmp/grpc
@@ -468,7 +445,7 @@ install_dependencies() {
         -DgRPC_ZLIB_PROVIDER=package \
         -DgRPC_SSL_PROVIDER=package
     make -j$(nproc)
-    sudo make install
+    make install
     popd
     rm -fr /tmp/grpc
 
@@ -585,7 +562,7 @@ install_deps_for_dev(){
 
   succ_msg="The script has installed all dependencies for builing GraphScope, use commands:\n
   $ source ${OUTPUT_ENV_FILE}
-  $ sudo make install\n
+  $ make install\n
   to build and develop GraphScope."
 }
 
