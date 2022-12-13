@@ -6,6 +6,14 @@ footer: |
   GraphScope is opensourced at https://github.com/alibaba/GraphScope
   by DAMO Acadamy, Alibaba Group.
 
+environment_variables:
+- name: GRAPHSCOPE_HOME
+  help: Installed HOME for GraphScope.
+  required: true
+- name: GRAPHSCOPE_ENV
+  help: One of dev, prod.
+  default: dev
+
 commands:
 
 - name: build
@@ -91,4 +99,6 @@ commands:
   - gs install-deps dev --from-local ~/Downloads/gs-all-deps
   - gs install-deps dev --no-grape-v6d
   - gs install-deps dev --only-grape-v6d
-  
+
+- name: spark-classpath
+  help: Generate classpath for spark jobs.
