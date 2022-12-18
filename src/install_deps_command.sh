@@ -1,4 +1,6 @@
 inspect_args
+# TODO: use homebrew to install libgrape-lite and vineyard on mac
+# TODO: support centos 7
 type=${args[type]}
 # from-local=${args[--from-local]}
 cn=${args[--cn]}
@@ -24,7 +26,7 @@ BASIC_PACKGES_TO_INSTALL=
 # always intall the latest, in order to support graphscope-dev-base and graphscope-dev
 readonly GRAPE_BRANCH="master" # libgrape-lite branch
 readonly V6D_VERSION="0.11.1"  # vineyard version
-readonly V6D_BRANCH="v0.11.1" # vineyard branch
+readonly V6D_BRANCH="v${V6D_VERSION}" # vineyard branch
 
 packages_to_install=()
 
@@ -255,11 +257,6 @@ check_dependencies() {
     packages_to_install+=(rust)
   fi
 
-  # check etcd
-  if ! command -v etcd &> /dev/null; then
-    packages_to_install+=(etcd)
-  fi
-
   # check mpi
   if ! command -v mpiexec &> /dev/null; then
     if [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
@@ -289,7 +286,7 @@ check_dependencies() {
 check_and_remove_dir() {
   if [[ -d $1 ]]; then
     log "Found $1 exists, remove it."
-    rm -fr $1
+    rm -rf $1
   fi
 }
 
@@ -317,7 +314,7 @@ install_cppkafka() {
   make install && popd
   popd
 
-  rm -fr /tmp/cppkafka
+  rm -rf /tmp/cppkafka
 }
 
 install_dependencies() {
@@ -378,24 +375,8 @@ install_dependencies() {
       make -j$(nproc)
       make install
       popd
-      rm -fr /tmp/openmpi-4.0.5 /tmp/openmpi-4.0.5.tar.gz
+      rm -rf /tmp/openmpi-4.0.5 /tmp/openmpi-4.0.5.tar.gz
       packages_to_install=("${packages_to_install[@]/openmpi}")
-    fi
-
-    if [[ "${packages_to_install[*]}" =~ "etcd" ]]; then
-      log "Installing etcd v3.4.13"
-      check_and_remove_dir "/tmp/etcd-download-test"
-      mkdir -p /tmp/etcd-download-test
-      export ETCD_VER=v3.4.13 && \
-      export DOWNLOAD_URL=https://github.com/etcd-io/etcd/releases/download && \
-      curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz \
-        -o /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
-      tar xzvf /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz \
-        -C /tmp/etcd-download-test --strip-components=1
-      mv /tmp/etcd-download-test/etcd /usr/local/bin/
-      mv /tmp/etcd-download-test/etcdctl /usr/local/bin/
-      rm -fr /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz /tmp/etcd-download-test
-      packages_to_install=("${packages_to_install[@]/etcd}")
     fi
 
     if [[ "${packages_to_install[*]}" =~ "rust" ]]; then
@@ -420,11 +401,11 @@ install_dependencies() {
     make -j$(nproc)
     make install && ldconfig
     popd
-    rm -fr /tmp/protobuf-all-3.13.0.tar.gz /tmp/protobuf-3.13.0
+    rm -rf /tmp/protobuf-all-3.13.0.tar.gz /tmp/protobuf-3.13.0
 
     log "Installing grpc v1.33.1"
     if [[ -d "/tmp/grpc" ]]; then
-      rm -fr /tmp/grpc
+      rm -rf /tmp/grpc
     fi
     git clone --depth 1 --branch v1.33.1 https://github.com/grpc/grpc.git /tmp/grpc
     pushd /tmp/grpc
@@ -447,7 +428,7 @@ install_dependencies() {
     make -j$(nproc)
     make install
     popd
-    rm -fr /tmp/grpc
+    rm -rf /tmp/grpc
 
     export LD_LIBRARY_PATH=/usr/local/lib
 
@@ -497,9 +478,9 @@ install_dependencies() {
 
   log "Installing python packages for vineyard codegen."
   pip3 install -U pip --user
-  pip3 install grpcio-tools libclang parsec setuptools wheel twine --user
+  pip3 install grpcio-tools libclang etcd-distro setuptools wheel twine --user
 
-  install_libgrape-lite
+  install_grape
 
   install_vineyard
 
@@ -512,7 +493,7 @@ install_dependencies() {
 write_envs_config() {
   if [ -f "${OUTPUT_ENV_FILE}" ]; then
     warning "Found ${OUTPUT_ENV_FILE} exists, remove the environmen config file and generate a new one."
-    rm -fr ${OUTPUT_ENV_FILE}
+    rm -rf ${OUTPUT_ENV_FILE}
   fi
 
   if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then

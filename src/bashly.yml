@@ -13,6 +13,14 @@ environment_variables:
 - name: GRAPHSCOPE_ENV
   help: One of dev, prod.
   default: dev
+- name: JOBS
+  default: 4
+- name: WORKDIR
+  default: /tmp
+- name: DEPS_PREFIX
+  default: /opt/graphscope
+- name: MPI_PREFIX
+  default: /opt/openmpi  # fixed, related to coordinator/setup.py
 
 commands:
 
