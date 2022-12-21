@@ -3,8 +3,8 @@ help: A bash utility for GraphScope
 version: 0.1.0
 
 footer: |
-  GraphScope is opensourced at https://github.com/alibaba/GraphScope
-  by DAMO Acadamy, Alibaba Group.
+  GraphScope is open sourced at https://github.com/alibaba/GraphScope
+  by DAMO Academy, Alibaba Group.
 
 environment_variables:
 - name: GRAPHSCOPE_HOME
@@ -19,6 +19,9 @@ environment_variables:
   default: /opt/graphscope
 - name: MPI_PREFIX
   default: /opt/openmpi  # fixed, related to coordinator/setup.py
+- name: CLEAN_AFTER_INSTALL
+  help: Clean artifacts of downloaded and built dependencies after installed
+  default: false
 
 commands:
 

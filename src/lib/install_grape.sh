@@ -11,7 +11,7 @@ install_grape() {
       https://github.com/alibaba/libgrape-lite.git "${WORKDIR}"/libgrape-lite
   pushd /tmp/libgrape-lite || exit
   mkdir -p build
-  cd build || exit
+  pushd build || exit
   cmake .. -DCMAKE_INSTALL_PREFIX="${DEPS_PREFIX}" \
           -DCMAKE_PREFIX_PATH="${DEPS_PREFIX}"
   make -j$(nproc)

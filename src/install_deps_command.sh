@@ -18,16 +18,13 @@ readonly OS_PLATFORM=${OS%-*}
 readonly OS_VERSION=${OS#*-}
 
 readonly OUTPUT_ENV_FILE="${HOME}/.graphscope_env"
-export DEPS_PREFIX="/usr/local"
-export WORKDIR="/tmp"
-export MPI_PREFIX="/opt/openmpi"
 
 BASIC_PACKAGES_TO_INSTALL=
 
 # TODO: remove these 3 lines, separate install grape/vineyard script to lib,
 # always install the latest, in order to support graphscope-dev-base and graphscope-dev
 export GRAPE_BRANCH="master"        # libgrape-lite branch
-export V6D_VERSION="0.11.2"         # vineyard version
+export V6D_VERSION="v0.11.2"         # vineyard version
 
 log "Installing ${type} dependencies for GraphScope on ${OS}..."
 
@@ -113,6 +110,7 @@ init_basic_packages() {
       BASIC_PACKAGES_TO_INSTALL+=(centos-release-scl-rh)
       ADDITIONAL_PACKAGES=(
         devtoolset-10-gcc-c++
+        rh-python38-python-pip
         rh-python38-python-devel
         rapidjson-devel
         msgpack-devel
@@ -188,7 +186,7 @@ install_java_maven_ubuntu() {
 install_java_maven_centos() {
   if ! command -v javac &>/dev/null; then
     log "Installing java-1.8.0-openjdk-devel"
-    apt install java-1.8.0-openjdk-devel -y
+    yum install java-1.8.0-openjdk-devel -y
   fi
   if ! command -v mvn &>/dev/null; then
     log "Installing maven"
@@ -210,9 +208,10 @@ install_java_maven_macos() {
 
 install_apache_arrow_ubuntu() {
   log "Installing apache-arrow."
-  wget -c https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
+  # shellcheck disable=SC2046
+  wget -c https://apache.jfrog.io/artifactory/arrow/"$(lsb_release --id --short | tr 'A-Z' 'a-z')"/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
     -P /tmp/
-  apt install -y -V /tmp/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
+  apt install -y -V /tmp/apache-arrow-apt-source-latest-"$(lsb_release --codename --short)".deb
   apt update -y && apt install -y libarrow-dev
   rm /tmp/apache-arrow-apt-source-latest-*.deb
 }
@@ -225,26 +224,36 @@ install_deps_ubuntu() {
   install_java_maven_ubuntu
 }
 
-install_deps_centos_common() {
-  install_cmake
+install_deps_centos_pre() {
+    log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
+    yum install -y "${BASIC_PACKAGES_TO_INSTALL[*]}"
+    log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
+    yum install -y "${ADDITIONAL_PACKAGES[*]}"
+    install_cmake
+}
+
+install_deps_centos_after() {
   install_apache_arrow
   install_open_mpi
   install_protobuf
+  install_zlib
   install_grpc
 
   install_java_maven_centos
 }
 install_deps_centos7() {
-  log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
-  yum install -y "${BASIC_PACKAGES_TO_INSTALL[*]}"
-  log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
-  yum install -y "${ADDITIONAL_PACKAGES[*]}"
+  install_deps_centos_pre
+
+  source /opt/rh/devtoolset-10/enable
+  source /opt/rh/rh-python38/enable
+  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${DEPS_PREFIX}/lib:${DEPS_PREFIX}/lib64
 
   install_gflags
   install_glog
   install_boost
   install_openssl
-  install_deps_centos_common
+
+  install_deps_centos_after
 }
 
 install_deps_centos8() {
@@ -255,12 +264,8 @@ install_deps_centos8() {
   dnf config-manager --set-enabled epel
   dnf config-manager --set-enabled powertools
 
-  log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
-  dnf install -y "${BASIC_PACKAGES_TO_INSTALL[*]}"
-  log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
-  dnf install -y "${ADDITIONAL_PACKAGES[*]}"
-
-  install_deps_centos_common
+  install_deps_centos_pre
+  install_deps_centos_after
 }
 
 install_deps_macos() {
@@ -305,7 +310,7 @@ install_dependencies() {
   install_cppkafka_universal
 
   log "Output environments config file ${OUTPUT_ENV_FILE}"
-  write_envs_config
+  write_env_config
 }
 
 write_env_config() {
@@ -339,6 +344,10 @@ write_env_config() {
     } >>"${OUTPUT_ENV_FILE}"
   else
     {
+      if [[ "${OS_VERSION}" -eq "7" ]]; then
+        echo "source /opt/rh/devtoolset-10/enable"
+        echo "source /opt/rh/rh-python38/enable"
+      fi
       echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${DEPS_PREFIX}/lib:${DEPS_PREFIX}/lib64"
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/java"

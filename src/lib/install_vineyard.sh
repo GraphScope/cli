@@ -1,12 +1,12 @@
 install_vineyard() {
   log "Building and installing vineyard."
   if command -v vineyardd &> /dev/null && \
-     [[ "$(vineyardd --version 2>&1 | awk -F ' ' '{print $3}')" == "${V6D_VERSION}" ]]; then
+     [[ $(vineyardd --version 2>&1 | awk '{print "v"$3}') == "${V6D_VERSION}" ]]; then
     log "vineyard ${V6D_VERSION} already installed, skip."
     return 0
   fi
 
-  rm -rf ${WORKDIR}/v6d || true
+  rm -rf "${WORKDIR}"/v6d || true
   git clone -b "${V6D_VERSION}" --depth=1 https://github.com/v6d-io/v6d.git "${WORKDIR}"/v6d
   pushd "${WORKDIR}"/v6d || exit
   git submodule update --init

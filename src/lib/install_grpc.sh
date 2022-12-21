@@ -6,11 +6,11 @@ install_grpc() {
     pushd grpc
     git submodule update --init
   else
-    tar zxvf grpc.tar.gz
+    tar zxf grpc.tar.gz
     pushd grpc
   fi
-  cmake . -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} \
-          -DCMAKE_PREFIX_PATH=${DEPS_PREFIX} \
+  cmake . -DCMAKE_INSTALL_PREFIX="${DEPS_PREFIX}" \
+          -DCMAKE_PREFIX_PATH="${DEPS_PREFIX}" \
           -DBUILD_SHARED_LIBS=ON \
           -DgRPC_INSTALL=ON \
           -DgRPC_BUILD_TESTS=OFF \
@@ -25,12 +25,12 @@ install_grpc() {
           -DgRPC_PROTOBUF_PROVIDER=package \
           -DgRPC_ZLIB_PROVIDER=package \
           -DgRPC_SSL_PROVIDER=package \
-          -DOPENSSL_ROOT_DIR=${DEPS_PREFIX} \
+          -DOPENSSL_ROOT_DIR="${DEPS_PREFIX}" \
           -DCMAKE_CXX_FLAGS="-fpermissive" \
           -DPNG_ARM_NEON_OPT=0
   make -j$(nproc)
   make install
   popd
   popd
-  rm -rf ${WORKDIR}/grpc
+  rm -rf "${WORKDIR}"/grpc
 }

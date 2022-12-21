@@ -1,14 +1,16 @@
 install_apache_arrow() {
   log "Building and installing apache-arrow."
 
-  pushd ${WORKDIR}
-  [ ! -f apache-arrow-9.0.0.tar.gz ] &&
-    wget -q https://github.com/apache/arrow/archive/apache-arrow-9.0.0.tar.gz
-  tar zxvf apache-arrow-9.0.0.tar.gz
-  pushd arrow-apache-arrow-9.0.0
+  pushd "${WORKDIR}" || exit
+  if [ ! -d arrow-apache-arrow-9.0.0 ]; then
+    [ ! -f apache-arrow-9.0.0.tar.gz ] &&
+      wget -q https://github.com/apache/arrow/archive/apache-arrow-9.0.0.tar.gz
+    tar zxf apache-arrow-9.0.0.tar.gz
+  fi
+  pushd arrow-apache-arrow-9.0.0 || exit
   cmake ./cpp \
-    -DCMAKE_PREFIX_PATH=${DEPS_PREFIX}
-    -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} \
+    -DCMAKE_PREFIX_PATH="${DEPS_PREFIX}" \
+    -DCMAKE_INSTALL_PREFIX="${DEPS_PREFIX}" \
     -DARROW_COMPUTE=ON \
     -DARROW_WITH_UTF8PROC=OFF \
     -DARROW_CSV=ON \
@@ -49,7 +51,10 @@ install_apache_arrow() {
     -DARROW_BUILD_STATIC=OFF
   make -j$(nproc)
   make install
-  popd
-  popd
-  rm -rf ${WORKDIR}/arrow-apache-arrow-9.0.0 ${WORKDIR}/apache-arrow-9.0.0.tar.gz
+  popd || exit
+  popd || exit
+
+  if [ "${CLEAN_AFTER_INSTALL}" = "true" ]; then
+    rm -rf "${WORKDIR}"/arrow-apache-arrow-9.0.0 "${WORKDIR}"/apache-arrow-9.0.0.tar.gz
+  fi
 }
