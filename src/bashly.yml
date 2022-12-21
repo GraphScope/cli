@@ -94,8 +94,8 @@ commands:
     help: Only install latest grape and v6d.
     conflicts: [--no-grape-v6d]
 
-  dependencies:
-  - wget # TODO: ossutil? I think wget is better.
+#  dependencies:
+#  - wget # TODO: ossutil? I think wget is better.
 
 
   examples:

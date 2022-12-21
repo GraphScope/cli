@@ -293,9 +293,9 @@ install_dependencies() {
       install_deps_ubuntu
     elif [[ "${OS_PLATFORM}" == *"CentOS"* ]]; then
       if [[ "${OS_VERSION}" -eq "8" ]]; then
-        install_deps_centos7
-      elif [[ "${OS_VERSION}" -eq "7" ]]; then
         install_deps_centos8
+      elif [[ "${OS_VERSION}" -eq "7" ]]; then
+        install_deps_centos7
       fi
     fi
     install_grape_vineyard_linux
