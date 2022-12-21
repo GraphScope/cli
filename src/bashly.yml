@@ -13,8 +13,6 @@ environment_variables:
 - name: GRAPHSCOPE_ENV
   help: One of dev, prod.
   default: dev
-- name: JOBS
-  default: 4
 - name: WORKDIR
   default: /tmp
 - name: DEPS_PREFIX
@@ -34,7 +32,7 @@ commands:
   - name: image
     help: Images to build.
     # Whitelist + required
-    allowed: [graphscope-dev-base, graphscope-dev]
+    allowed: [graphscope-dev-base, graphscope-dev, coordinator, analytical, interactive-frontend, interactive-executor, learning]
     required: true
   
   flags:
@@ -74,7 +72,7 @@ commands:
   - name: type
     help: dependencies for development or client
     # whitelist + required
-    allowed: [dev, client]
+    allowed: [dev, client, groot]
     required: true
 
   flags:

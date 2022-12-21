@@ -6,17 +6,18 @@ install_grape() {
     return 0
   fi
 
-  rm -rf ${WORKDIR}/libgrape-lite || true
-  git clone --depth=1 \
-      https://github.com/alibaba/libgrape-lite.git ${WORKDIR}/libgrape-lite
-  pushd /tmp/libgrape-lite
+  rm -rf "${WORKDIR}"/libgrape-lite || true
+  git clone -b "${GRAPE_BRANCH}" --depth=1 \
+      https://github.com/alibaba/libgrape-lite.git "${WORKDIR}"/libgrape-lite
+  pushd /tmp/libgrape-lite || exit
   mkdir -p build
-  cd build
-  cmake .. -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX}
+  cd build || exit
+  cmake .. -DCMAKE_INSTALL_PREFIX="${DEPS_PREFIX}" \
+          -DCMAKE_PREFIX_PATH="${DEPS_PREFIX}"
   make -j$(nproc)
   # TODO? may have permission issues. use sudo?
   make install
-  popd
-  popd
-  rm -rf ${WORKDIR}/libgrape-lite
+  popd || exit
+  popd || exit
+  rm -rf "${WORKDIR}"/libgrape-lite
 }

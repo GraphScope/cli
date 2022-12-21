@@ -6,7 +6,9 @@ install_glog() {
     wget -q https://github.com/google/glog/archive/v0.6.0.tar.gz
   tar zxvf v0.6.0.tar.gz
   pushd glog-0.6.0
-  cmake . -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX}
+  cmake . -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} \
+          -DCMAKE_PREFIX_PATH=${DEPS_PREFIX} \
+          -DBUILD_SHARED_LIBS=ON
   make -j$(nproc)
   make install
   popd

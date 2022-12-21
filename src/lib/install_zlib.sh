@@ -6,7 +6,9 @@ install_zlib() {
     wget -q https://github.com/madler/zlib/archive/v1.2.11.tar.gz
   tar zxvf v1.2.11.tar.gz
   pushd zlib-1.2.11
-  cmake . -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DBUILD_SHARED_LIBS=ON
+  cmake . -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} \
+          -DCMAKE_PREFIX_PATH=${DEPS_PREFIX} \
+          -DBUILD_SHARED_LIBS=ON
   make -j$(nproc)
   make install
   popd

@@ -7,6 +7,7 @@ install_apache_arrow() {
   tar zxvf apache-arrow-9.0.0.tar.gz
   pushd arrow-apache-arrow-9.0.0
   cmake ./cpp \
+    -DCMAKE_PREFIX_PATH=${DEPS_PREFIX}
     -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} \
     -DARROW_COMPUTE=ON \
     -DARROW_WITH_UTF8PROC=OFF \
