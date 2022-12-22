@@ -13,5 +13,6 @@ git clone -b zsy/refine https://github.com/siyuan0322/cli
 cd cli
 bashly generate
 
+export GRAPHSCOPE_NO_INSTALL_CLEANUP=true
 
 ./gs install-deps dev

@@ -85,7 +85,7 @@ install_apache_arrow() {
   install_prefix=$2
 
   directory="arrow-apache-arrow-9.0.0"
-  file="${directory}.tar.gz"
+  file="apache-arrow-9.0.0.tar.gz"
   url="https://github.com/apache/arrow/archive"
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit

@@ -200,9 +200,7 @@ install_java_maven_macos() {
 
 install_apache_arrow_ubuntu() {
   log "Installing apache-arrow."
-  # shellcheck disable=SC2046
-  # shellcheck disable=SC2019
-  # shellcheck disable=SC2018
+  # shellcheck disable=SC2046,SC2019,SC2018
   wget -c https://apache.jfrog.io/artifactory/arrow/"$(lsb_release --id --short | tr 'A-Z' 'a-z')"/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
     -P /tmp/
   apt install -y -V /tmp/apache-arrow-apt-source-latest-"$(lsb_release --codename --short)".deb
@@ -220,9 +218,11 @@ install_deps_ubuntu() {
 
 install_deps_centos_pre() {
     log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
-    yum install -y "${BASIC_PACKAGES_TO_INSTALL[*]}"
+    # shellcheck disable=SC2086
+    yum install -y ${BASIC_PACKAGES_TO_INSTALL[*]}
     log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
-    yum install -y "${ADDITIONAL_PACKAGES[*]}"
+    # shellcheck disable=SC2086
+    yum install -y ${ADDITIONAL_PACKAGES[*]}
     install_cmake  "${deps_prefix}" "${install_prefix}"
 }
 
@@ -266,7 +266,8 @@ install_deps_macos() {
   log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
   export HOMEBREW_NO_INSTALL_CLEANUP=1
   export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
-  brew install "${BASIC_PACKAGES_TO_INSTALL[*]}" || true
+  # shellcheck disable=SC2086
+  brew install ${BASIC_PACKAGES_TO_INSTALL[*]} || true
 
   brew install llvm
 
@@ -330,7 +331,7 @@ write_env_config() {
 
   elif [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
     {
-      echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${install_prefix}/lib:${install_prefix}/lib64"
+      echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/default-java"
       fi
@@ -342,7 +343,7 @@ write_env_config() {
         echo "source /opt/rh/devtoolset-10/enable"
         echo "source /opt/rh/rh-python38/enable"
       fi
-      echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${install_prefix}/lib:${install_prefix}/lib64"
+      echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/java"
       fi
@@ -351,11 +352,20 @@ write_env_config() {
   fi
 }
 
+init_workspace_and_env() {
+  mkdir -p "${install_prefix}"
+  mkdir -p "${deps_prefix}"
+  export PATH=${install_prefix}/bin:${PATH}
+  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${install_prefix}/lib:${install_prefix}/lib64
+}
+
 install_deps_for_dev() {
   # install_deps for development on local
   check_os_compatibility
 
   init_basic_packages
+
+  init_workspace_and_env
 
   install_dependencies
 
