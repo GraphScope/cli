@@ -28,5 +28,21 @@ jobs:
         
     - uses: actions/upload-artifact@v3
       with:
-        name: generated executive script
+        name: generated-executive-script
         path: gs
+
+  test:
+    name: Test install dependency
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: generated-executive-script
+        path: gs
+    - name: Install dev
+      run: |
+        ls -la
+        bash ./gs install-deps dev

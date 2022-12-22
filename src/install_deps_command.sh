@@ -6,8 +6,10 @@ cn=${args[--cn]}
 install_prefix=${args[--prefix]}
 deps_prefix=${args[--deps-prefix]}
 
-only_grape_v6d=${args[--only - grape - v6d]}
-# no-grape-v6d=${args[--no-grape-v6d]}
+only_grape_v6d=${args[--only-grape-v6d]}
+no_grape_v6d=${args[--no-grape-v6d]}
+
+v6d_version=${args[--v6d-version]}
 
 if [[ $(id -u) -ne 0 ]]; then
   error "Not running as root."
@@ -70,12 +72,14 @@ init_basic_packages() {
       git
       cmake
       build-essential
+      lsb_release
       libopenmpi-dev
       libgflags-dev
       libgoogle-glog-dev
       libboost-all-dev
       libprotobuf-dev
       libgrpc++-dev
+      protobuf-compiler-grpc
       python3-pip
       libunwind-dev
       rapidjson-dev
@@ -136,7 +140,7 @@ install_grape_vineyard_linux() {
   pip3 install pip -U --user
   pip3 install libclang --user
   install_grape "${deps_prefix}" "${install_prefix}"
-  install_vineyard "${deps_prefix}" "${install_prefix}"
+  install_vineyard "${deps_prefix}" "${install_prefix}" "${v6d_version}"
 }
 
 install_grape_vineyard_macos() {
@@ -165,13 +169,13 @@ install_rust_universal() {
 install_java_maven_ubuntu() {
   if ! command -v javac &>/dev/null; then
     # log "Installing openjdk-8-jdk"
-    # apt install openjdk-8-jdk -y
+    # apt-get install openjdk-8-jdk -y
     log "Installing default-jdk"
-    apt install default-jdk -y
+    apt-get install default-jdk -y
   fi
   if ! command -v mvn &>/dev/null; then
     log "Installing maven"
-    apt install maven -y
+    apt-get install maven -y
   fi
 }
 
@@ -203,14 +207,16 @@ install_apache_arrow_ubuntu() {
   # shellcheck disable=SC2046,SC2019,SC2018
   wget -c https://apache.jfrog.io/artifactory/arrow/"$(lsb_release --id --short | tr 'A-Z' 'a-z')"/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
     -P /tmp/
-  apt install -y -V /tmp/apache-arrow-apt-source-latest-"$(lsb_release --codename --short)".deb
-  apt update -y && apt install -y libarrow-dev
+  apt-get install -y -V /tmp/apache-arrow-apt-source-latest-"$(lsb_release --codename --short)".deb
+  apt-get update -y && apt-get install -y libarrow-dev
   rm /tmp/apache-arrow-apt-source-latest-*.deb
 }
 
 install_deps_ubuntu() {
   log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
-  apt update -y && apt install -y "${BASIC_PACKAGES_TO_INSTALL[*]}"
+  # shellcheck disable=SC2086
+  apt-get update -y
+  DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y ${BASIC_PACKAGES_TO_INSTALL[*]}
 
   install_apache_arrow_ubuntu
   install_java_maven_ubuntu
@@ -253,8 +259,8 @@ install_deps_centos7() {
 install_deps_centos8() {
   sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
   sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-  yum install 'dnf-command(config-manager)'
-  dnf install epel-release -y
+  yum install -y 'dnf-command(config-manager)'
+  dnf install -y epel-release
   dnf config-manager --set-enabled epel
   dnf config-manager --set-enabled powertools
 
@@ -287,7 +293,9 @@ install_dependencies() {
   # install dependencies for specific platforms.
   if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
     install_deps_macos
-    install_grape_vineyard_macos
+    if [[ -z ${no_grape_v6d} ]]; then
+      install_grape_vineyard_macos
+    fi
   else
     if [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
       install_deps_ubuntu
@@ -298,7 +306,9 @@ install_dependencies() {
         install_deps_centos7
       fi
     fi
-    install_grape_vineyard_linux
+    if [[ -z ${no_grape_v6d} ]]; then
+      install_grape_vineyard_linux
+    fi
   fi
 
   install_rust_universal
@@ -376,8 +386,13 @@ install_deps_for_dev() {
 }
 
 install_deps_for_client() {
-  echo "TODO"
   # install python..
+  # TODO: refine
+  pip3 install -U pip
+  pip3 --no-cache-dir install auditwheel==5.0.0 daemons etcd-distro gremlinpython \
+          hdfs3 fsspec oss2 s3fs ipython kubernetes libclang networkx==2.4 numpy pandas parsec pycryptodome \
+          pyorc pytest scipy scikit_learn wheel
+  pip3 --no-cache-dir install Cython --pre -U
 }
 
 # run subcommand with the type
