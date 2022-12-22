@@ -4,5 +4,4 @@ echo "# you can edit it freely and regenerate (it will not be overwritten)"
 inspect_args
 image_name=${args[image]}
 
-echo "$(green_bold "image to be built: ${image_name}")"
-cd 
+log "image to be built: ${image_name}"

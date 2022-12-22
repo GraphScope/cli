@@ -3,6 +3,9 @@ inspect_args
 type=${args[type]}
 # from-local=${args[--from-local]}
 cn=${args[--cn]}
+install_prefix=${args[--prefix]}
+deps_prefix=${args[--deps-prefix]}
+
 only_grape_v6d=${args[--only - grape - v6d]}
 # no-grape-v6d=${args[--no-grape-v6d]}
 
@@ -20,11 +23,6 @@ readonly OS_VERSION=${OS#*-}
 readonly OUTPUT_ENV_FILE="${HOME}/.graphscope_env"
 
 BASIC_PACKAGES_TO_INSTALL=
-
-# TODO: remove these 3 lines, separate install grape/vineyard script to lib,
-# always install the latest, in order to support graphscope-dev-base and graphscope-dev
-export GRAPE_BRANCH="master"        # libgrape-lite branch
-export V6D_VERSION="v0.11.2"         # vineyard version
 
 log "Installing ${type} dependencies for GraphScope on ${OS}..."
 
@@ -52,7 +50,7 @@ check_os_compatibility() {
     exit 1
   fi
 
-  if [[ "${OS_PLATFORM}" == *"Ubuntu"* && "$(echo "${OS_VERSION}" | sed 's/\([0-9]\)\([0-9]\).*/\1\2/')" -lt "20" ]]; then
+  if [[ "${OS_PLATFORM}" == *"Ubuntu"* && "${OS_VERSION:0:2}" -lt "20" ]]; then
     err "The version of Ubuntu is ${OS_VERSION}. This script requires Ubuntu 20 or greater."
     exit 1
   fi
@@ -137,8 +135,8 @@ install_grape_vineyard_linux() {
   log "Installing python packages for vineyard codegen."
   pip3 install pip -U --user
   pip3 install libclang --user
-  install_grape
-  install_vineyard
+  install_grape "${deps_prefix}" "${install_prefix}"
+  install_vineyard "${deps_prefix}" "${install_prefix}"
 }
 
 install_grape_vineyard_macos() {
@@ -148,19 +146,13 @@ install_grape_vineyard_macos() {
 install_cppkafka_universal() {
   log "Building and installing cppkafka."
 
-  if [[ -f "/usr/local/include/cppkafka/cppkafka.h" ]]; then
-    log "cppkafka already installed, skip."
-    return 0
-  fi
-
   if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
     homebrew_prefix=$(brew --prefix)
     export LDFLAGS="-L${homebrew_prefix}/opt/openssl@3/lib"
     export CPPFLAGS="-I${homebrew_prefix}/opt/openssl@3/include"
   fi
 
-  log "install cpp kafka"
-  install_cppkafka
+  install_cppkafka "${deps_prefix}" "${install_prefix}"
 }
 
 install_rust_universal() {
@@ -190,7 +182,7 @@ install_java_maven_centos() {
   fi
   if ! command -v mvn &>/dev/null; then
     log "Installing maven"
-    install_maven
+    install_maven  "${deps_prefix}" "${install_prefix}"
   fi
 }
 
@@ -209,6 +201,8 @@ install_java_maven_macos() {
 install_apache_arrow_ubuntu() {
   log "Installing apache-arrow."
   # shellcheck disable=SC2046
+  # shellcheck disable=SC2019
+  # shellcheck disable=SC2018
   wget -c https://apache.jfrog.io/artifactory/arrow/"$(lsb_release --id --short | tr 'A-Z' 'a-z')"/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
     -P /tmp/
   apt install -y -V /tmp/apache-arrow-apt-source-latest-"$(lsb_release --codename --short)".deb
@@ -229,15 +223,15 @@ install_deps_centos_pre() {
     yum install -y "${BASIC_PACKAGES_TO_INSTALL[*]}"
     log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
     yum install -y "${ADDITIONAL_PACKAGES[*]}"
-    install_cmake
+    install_cmake  "${deps_prefix}" "${install_prefix}"
 }
 
 install_deps_centos_after() {
-  install_apache_arrow
-  install_open_mpi
-  install_protobuf
-  install_zlib
-  install_grpc
+  install_apache_arrow "${deps_prefix}" "${install_prefix}"
+  install_open_mpi "${deps_prefix}" "${install_prefix}"
+  install_protobuf "${deps_prefix}" "${install_prefix}"
+  install_zlib "${deps_prefix}" "${install_prefix}"
+  install_grpc "${deps_prefix}" "${install_prefix}"
 
   install_java_maven_centos
 }
@@ -246,12 +240,12 @@ install_deps_centos7() {
 
   source /opt/rh/devtoolset-10/enable
   source /opt/rh/rh-python38/enable
-  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${DEPS_PREFIX}/lib:${DEPS_PREFIX}/lib64
+  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${install_prefix}/lib:${install_prefix}/lib64
 
-  install_gflags
-  install_glog
-  install_boost
-  install_openssl
+  install_gflags "${deps_prefix}" "${install_prefix}"
+  install_glog "${deps_prefix}" "${install_prefix}"
+  install_boost "${deps_prefix}" "${install_prefix}"
+  install_openssl "${deps_prefix}" "${install_prefix}"
 
   install_deps_centos_after
 }
@@ -336,7 +330,7 @@ write_env_config() {
 
   elif [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
     {
-      echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${DEPS_PREFIX}/lib:${DEPS_PREFIX}/lib64"
+      echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${install_prefix}/lib:${install_prefix}/lib64"
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/default-java"
       fi
@@ -348,7 +342,7 @@ write_env_config() {
         echo "source /opt/rh/devtoolset-10/enable"
         echo "source /opt/rh/rh-python38/enable"
       fi
-      echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${DEPS_PREFIX}/lib:${DEPS_PREFIX}/lib64"
+      echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${install_prefix}/lib:${install_prefix}/lib64"
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/java"
       fi
@@ -358,7 +352,6 @@ write_env_config() {
 }
 
 install_deps_for_dev() {
-  echo "TODO"
   # install_deps for development on local
   check_os_compatibility
 

@@ -28,4 +28,3 @@ get_os_version() {
   fi
   echo "$PLATFORM-$OS_VERSION"
 }
-get_os_version

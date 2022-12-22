@@ -13,15 +13,6 @@ environment_variables:
 - name: GRAPHSCOPE_ENV
   help: One of dev, prod.
   default: dev
-- name: WORKDIR
-  default: /tmp
-- name: DEPS_PREFIX
-  default: /opt/graphscope
-- name: MPI_PREFIX
-  default: /opt/openmpi  # fixed, related to coordinator/setup.py
-- name: CLEAN_AFTER_INSTALL
-  help: Clean artifacts of downloaded and built dependencies after installed
-  default: false
 
 commands:
 
@@ -75,7 +66,7 @@ commands:
   - name: type
     help: dependencies for development or client
     # whitelist + required
-    allowed: [dev, client, groot]
+    allowed: [dev, client]
     required: true
 
   flags:
@@ -86,7 +77,17 @@ commands:
     short: -l
     arg: from-local
     help: Install deps from a local location. If the location is empty, it will download a tar with all deps from Web (via oss).
-  
+
+  - long: --prefix
+    arg: prefix
+    help: Install dependency files to [prefix]. By default, './gs install-deps dev' will install all the files in '/opt/graphscope/bin', '/opt/graphscope/lib' etc. You can specify an installation prefix other than '/opt/graphscope' using '--prefix', for instance '--prefix=\$HOME'.
+    default: /opt/graphscope
+
+  - long: --deps-prefix
+    arg: deps-prefix
+    help: Download dependency files to [deps-prefix]
+    default: /tmp/gs-deps
+
   - long: --no-grape-v6d
     short: -n
     help: Install deps but not grape/v6d, for building a docker images relatively stable.
