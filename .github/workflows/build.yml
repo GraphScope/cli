@@ -48,7 +48,7 @@ jobs:
         cd gs
         sudo bash ./gs install-deps dev
         # TODO: Using sudo will cause the env output location to root home
-        cat /root/.graphscope_env
+        sudo cat /root/.graphscope_env
   test-macos:
     name: Test install dependency (macos-latest)
     needs: [build]
