@@ -2,6 +2,11 @@ install_cmake() {
   workdir=$1
   install_prefix=$2
 
+  if [[ -f "${install_prefix}/bin/cmake" ]]; then
+    log "cmake already installed, skip."
+    return 0
+  fi
+
   ARCH=$(uname -m)
   file="cmake-3.24.3-linux-${ARCH}.sh"
   log "Building and installing ${file}."
@@ -20,6 +25,11 @@ install_open_mpi() {
   workdir=$1
   install_prefix=$2
   MPI_PREFIX="/opt/openmpi"  # fixed, related to coordinator/setup.py
+
+  if [[ -f "${install_prefix}/include/mpi.h" ]]; then
+    log "openmpi already installed, skip."
+    return 0
+  fi
 
   directory="openmpi-4.0.5"
   file="openmpi-4.0.5.tar.gz"
@@ -42,6 +52,11 @@ install_open_mpi() {
 install_gflags() {
   workdir=$1
   install_prefix=$2
+
+  if [[ -f "${install_prefix}/include/gflags/gflags.h" ]]; then
+    log "gflags already installed, skip."
+    return 0
+  fi
 
   directory="gflags-2.2.2"
   file="v2.2.2.tar.gz"
@@ -66,6 +81,11 @@ install_glog() {
   workdir=$1
   install_prefix=$2
 
+  if [[ -f "${install_prefix}/include/glog/logging.h" ]]; then
+    log "glog already installed, skip."
+    return 0
+  fi
+
   directory="glog-0.6.0"
   file="v0.6.0.tar.gz"
   url="https://github.com/google/glog/archive"
@@ -88,6 +108,11 @@ install_glog() {
 install_apache_arrow() {
   workdir=$1
   install_prefix=$2
+
+  if [[ -f "${install_prefix}/include/arrow/api.h" ]]; then
+    log "apache-arrow already installed, skip."
+    return 0
+  fi
 
   directory="arrow-apache-arrow-9.0.0"
   file="apache-arrow-9.0.0.tar.gz"
@@ -150,6 +175,11 @@ install_boost() {
   workdir=$1
   install_prefix=$2
 
+  if [[ -f "${install_prefix}/include/boost/version.hpp" ]]; then
+    log "boost already installed, skip."
+    return 0
+  fi
+
   directory="boost_1_74_0"
   file="${directory}.tar.gz"
   url="https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source"
@@ -171,6 +201,11 @@ install_openssl() {
   workdir=$1
   install_prefix=$2
 
+  if [[ -f "${install_prefix}/include/openssl/ssl.h" ]]; then
+    log "openssl already installed, skip."
+    return 0
+  fi
+
   directory="openssl-OpenSSL_1_1_1h"
   file="OpenSSL_1_1_1h.tar.gz"
   url="https://github.com/openssl/openssl/archive"
@@ -191,6 +226,11 @@ install_openssl() {
 install_zlib() {
   workdir=$1
   install_prefix=$2
+
+  if [[ -f "${install_prefix}/include/zlib.h" ]]; then
+    log "zlib already installed, skip."
+    return 0
+  fi
 
   directory="zlib-1.2.11"
   file="v1.2.11.tar.gz"
@@ -215,6 +255,11 @@ install_protobuf() {
   workdir=$1
   install_prefix=$2
 
+  if [[ -f "${install_prefix}/include/google/protobuf/port.h" ]]; then
+    log "protobuf already installed, skip."
+    return 0
+  fi
+
   directory="protobuf-21.9"
   file="protobuf-all-21.9.tar.gz"
   url="https://github.com/protocolbuffers/protobuf/releases/download/v21.9"
@@ -237,15 +282,23 @@ install_grpc() {
   workdir=$1
   install_prefix=$2
 
+  if [[ -f "${install_prefix}/include/grpcpp/grpcpp.h" ]]; then
+    log "grpc already installed, skip."
+    return 0
+  fi
+
   directory="grpc"
-  file="${directory}.tar.gz"
+  branch="v1.49.1"
+  file="${directory}-${branch}.tar.gz"
   url="https://github.com/grpc/grpc.git"
   url=$(maybe_set_to_cn_url ${url})
-  branch="v1.49.1"
   log "Building and installing ${directory}."
-
   pushd "${workdir}" || exit
-  clone_if_not_exists ${directory} ${file} "${url}" ${branch}
+  if [[ ${url} == "*.git" ]]; then
+    clone_if_not_exists ${directory} ${file} "${url}" ${branch}
+  else
+    download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
+  fi
   pushd ${directory} || exit
 
   cmake . -DCMAKE_INSTALL_PREFIX="${install_prefix}" \
@@ -278,6 +331,11 @@ install_cppkafka() {
   workdir=$1
   install_prefix=$2
 
+  if [[ -f "${install_prefix}/include/cppkafka/cppkafka.h" ]]; then
+    log "cppkafka already installed, skip."
+    return 0
+  fi
+
   directory="cppkafka-0.4.0"
   file="0.4.0.tar.gz"
   url="https://github.com/mfontanini/cppkafka/archive/refs/tags"
@@ -301,6 +359,11 @@ install_cppkafka() {
 install_maven() {
   workdir=$1
   install_prefix=$2
+
+  if [[ -f "${install_prefix}/bin/mvn" ]]; then
+    log "maven already installed, skip."
+    return 0
+  fi
 
   directory="apache-maven-3.8.6"
   file="apache-maven-3.8.6-bin.tar.gz"

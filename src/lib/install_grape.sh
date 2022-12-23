@@ -7,13 +7,17 @@ install_grape() {
     return 0
   fi
   directory="libgrape-lite"
-  file="${directory}.tar.gz"
-  url="https://github.com/alibaba/libgrape-lite.git"
   branch="master"
+  file="${directory}-${branch}.tar.gz"
+  url="https://github.com/alibaba/libgrape-lite.git"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
-
   pushd "${workdir}" || exit
-  clone_if_not_exists ${directory} ${file} ${url} ${branch}
+  if [[ ${url} == "*.git" ]]; then
+    clone_if_not_exists ${directory} ${file} "${url}" ${branch}
+  else
+    download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
+  fi
   pushd ${directory} || exit
 
   cmake . -DCMAKE_INSTALL_PREFIX="${install_prefix}" \

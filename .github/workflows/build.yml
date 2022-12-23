@@ -62,4 +62,4 @@ jobs:
           cd gs
           brew install bash
           alias bash=$(brew --prefix)/bin/bash
-          sudo bash ./gs install-deps dev
+          bash ./gs install-deps dev

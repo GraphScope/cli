@@ -11,12 +11,17 @@ install_vineyard() {
   fi
 
   directory="v6d"
-  file="${directory}.tar.gz"
+  branch=${v6d_version}
+  file="${directory}-${branch}.tar.gz"
   url="https://github.com/v6d-io/v6d.git"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
-
   pushd "${workdir}" || exit
-  clone_if_not_exists ${directory} ${file} ${url} "${v6d_version}"
+  if [[ ${url} == "*.git" ]]; then
+    clone_if_not_exists ${directory} "${file}" "${url}" "${branch}"
+  else
+    download_tar_and_untar_if_not_exists ${directory} "${file}" "${url}"
+  fi
   pushd ${directory} || exit
 
   cmake . -DCMAKE_PREFIX_PATH="${install_prefix}" \

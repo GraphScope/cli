@@ -138,7 +138,7 @@ init_basic_packages() {
 install_grape_vineyard_linux() {
   log "Installing python packages for vineyard codegen."
   pip3 install pip -U --user
-  pip3 install libclang --user
+  pip3 install libclang wheel --user
   install_grape "${deps_prefix}" "${install_prefix}"
   install_vineyard "${deps_prefix}" "${install_prefix}" "${v6d_version}"
 }
