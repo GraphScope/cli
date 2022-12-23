@@ -1,0 +1,2 @@
+# for aarch64 image
+RUN curl https://mirrors.aliyun.com/repo/Centos-7.repo | sed -e "s/centos/centos-altarch/g" > /etc/yum.repos.d/CentOS-Base.repo

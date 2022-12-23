@@ -7,7 +7,7 @@ inspect_args
 
 # check if the file exists
 # if yes, raise a warning
-# otherwise, generate a new 
+# otherwise, generate a new
 
 echo "$(green_bold "Generated environment variables for spark jobs in ~/.graphscope_4spark.env")"
 echo

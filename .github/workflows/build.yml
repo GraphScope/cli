@@ -28,5 +28,44 @@ jobs:
         
     - uses: actions/upload-artifact@v3
       with:
-        name: generated executive script
+        name: generated-executive-script
         path: gs
+
+  test-linux:
+    name: Test install dependency
+    needs: [build]
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: generated-executive-script
+        path: gs
+    - name: Install dev
+      run: |
+        cd gs
+        sudo bash ./gs install-deps dev
+        # TODO: Using sudo will cause the env output location to root home
+        sudo cat /root/.graphscope_env
+  test-macos:
+    name: Test install dependency (macos-latest)
+    needs: [build]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: generated-executive-script
+          path: gs
+      - name: Install dev
+        run: |
+          ls -la gs
+          cd gs
+          brew update
+          brew install bash
+          alias bash=$(brew --prefix)/bin/bash
+          # Doesn't have permission on /opt/graphscope
+          # and one could not use brew with sudo
+          bash ./gs install-deps dev --prefix $HOME/graphscope
+          cat ~/.graphscope_env

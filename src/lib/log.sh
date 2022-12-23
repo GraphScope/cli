@@ -11,5 +11,5 @@ log() {
 }
 
 succ() {
-  echo -e "$(green_bold "[SUCCESSED]: $*")" >&1
+  echo -e "$(green_bold "[SUCCESS]: $*")" >&1
 }
