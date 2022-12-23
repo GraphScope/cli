@@ -45,6 +45,7 @@ jobs:
         path: gs
     - name: Install dev
       run: |
-        ls -la
+        ls -la gs
+        cd gs
         bash ./gs install-deps dev || true
         sudo bash ./gs install-deps dev
