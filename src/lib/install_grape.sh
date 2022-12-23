@@ -20,7 +20,7 @@ install_grape() {
           -DCMAKE_PREFIX_PATH="${install_prefix}"
   make -j$(nproc)
   make install
-  strip "${workdir}/bin/run_app"
+  strip "${install_prefix}/bin/run_app"
   popd || exit
   popd || exit
   cleanup_files "${workdir}/${directory}" "${workdir}/${file}"
