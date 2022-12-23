@@ -73,7 +73,7 @@ init_basic_packages() {
       git
       cmake
       build-essential
-      lsb_release
+      lsb-release
       libopenmpi-dev
       libgflags-dev
       libgoogle-glog-dev
