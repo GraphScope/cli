@@ -154,8 +154,9 @@ install_cppkafka_universal() {
 
   if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
     homebrew_prefix=$(brew --prefix)
-    export LDFLAGS="-L${homebrew_prefix}/opt/openssl@3/lib"
-    export CPPFLAGS="-I${homebrew_prefix}/opt/openssl@3/include"
+    export LDFLAGS="-L${homebrew_prefix}/opt/openssl@1.1/lib"
+    export CPPFLAGS="-I${homebrew_prefix}/opt/openssl@1.1/include"
+    export PKG_CONFIG_PATH="${homebrew_prefix}/opt/openssl@1.1/lib/pkgconfig"
   fi
 
   install_cppkafka "${deps_prefix}" "${install_prefix}"
@@ -323,7 +324,7 @@ install_dependencies() {
 write_env_config() {
   if [ -f "${OUTPUT_ENV_FILE}" ]; then
     warning "Found ${OUTPUT_ENV_FILE} exists, remove the environment config file and generate a new one."
-    rm -rf "${OUTPUT_ENV_FILE}"
+    rm -f "${OUTPUT_ENV_FILE}"
   fi
 
   if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
@@ -335,7 +336,7 @@ write_env_config() {
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=\$(/usr/libexec/java_home -v11)"
       fi
-      echo "export PATH=\$HOME/.cargo/bin:\${JAVA_HOME}/bin:/usr/local/go/bin:\$PATH"
+      echo "export PATH=${install_prefix}/bin:\$HOME/.cargo/bin:\${JAVA_HOME}/bin:\$PATH"
       echo "export OPENSSL_ROOT_DIR=${homebrew_prefix}/opt/openssl"
       echo "export OPENSSL_LIBRARIES=${homebrew_prefix}/opt/openssl/lib"
       echo "export OPENSSL_SSL_LIBRARY=${homebrew_prefix}/opt/openssl/lib/libssl.dylib"
@@ -347,7 +348,7 @@ write_env_config() {
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/default-java"
       fi
-      echo "export PATH=\${JAVA_HOME}/bin:\$HOME/.cargo/bin:\$PATH"
+      echo "export PATH=${install_prefix}/bin:\${JAVA_HOME}/bin:\$HOME/.cargo/bin:\$PATH"
     } >>"${OUTPUT_ENV_FILE}"
   else
     {
@@ -359,7 +360,7 @@ write_env_config() {
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/java"
       fi
-      echo "export PATH=\${JAVA_HOME}/bin:\$HOME/.cargo/bin:\$PATH"
+      echo "export PATH=${install_prefix}/bin:\${JAVA_HOME}/bin:\$HOME/.cargo/bin:\$PATH"
     } >>"${OUTPUT_ENV_FILE}"
   fi
 }

@@ -352,7 +352,7 @@ install_cppkafka() {
           -DCMAKE_PREFIX_PATH="${install_prefix}" \
           -DCPPKAFKA_DISABLE_TESTS=ON  \
           -DCPPKAFKA_DISABLE_EXAMPLES=ON
-  make -j$(nproc)
+  make -j4
   make install
   popd || exit
   popd || exit

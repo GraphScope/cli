@@ -47,7 +47,8 @@ jobs:
       run: |
         cd gs
         sudo bash ./gs install-deps dev
-        cat ~/.graphscope_env
+        # TODO: Using sudo will cause the env output location to root home
+        cat /root/.graphscope_env
   test-macos:
     name: Test install dependency (macos-latest)
     needs: [build]
@@ -61,6 +62,7 @@ jobs:
         run: |
           ls -la gs
           cd gs
+          brew update
           brew install bash
           alias bash=$(brew --prefix)/bin/bash
           # Doesn't have permission on /opt/graphscope
