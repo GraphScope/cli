@@ -68,6 +68,7 @@ check_os_compatibility() {
 init_basic_packages() {
   if [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
     BASIC_PACKAGES_TO_INSTALL=(
+      curl
       wget
       git
       cmake
@@ -92,6 +93,7 @@ init_basic_packages() {
       perl
       which
       sudo
+      curl
       wget
       git
       libunwind-devel

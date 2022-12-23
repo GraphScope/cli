@@ -13,7 +13,7 @@ install_grape() {
   url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  if [[ ${url} == "*.git" ]]; then
+  if [[ ${url} == *.git ]]; then
     clone_if_not_exists ${directory} ${file} "${url}" ${branch}
   else
     download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"

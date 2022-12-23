@@ -294,7 +294,7 @@ install_grpc() {
   url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  if [[ ${url} == "*.git" ]]; then
+  if [[ ${url} == *.git ]]; then
     clone_if_not_exists ${directory} ${file} "${url}" ${branch}
   else
     download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
@@ -344,6 +344,9 @@ install_cppkafka() {
   pushd "${workdir}" || exit
   download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   pushd ${directory} || exit
+
+  # cppkafka may not find the lib64 directory
+  export LIBRARY_PATH=${LIBRARY_PATH}:${install_prefix}/lib:${install_prefix}/lib64
 
   cmake . -DCMAKE_INSTALL_PREFIX="${install_prefix}" \
           -DCMAKE_PREFIX_PATH="${install_prefix}" \

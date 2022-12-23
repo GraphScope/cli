@@ -47,8 +47,9 @@ jobs:
       run: |
         cd gs
         sudo bash ./gs install-deps dev
+        cat ~/.graphscope_env
   test-macos:
-    name: Test install dependency
+    name: Test install dependency (macos-latest)
     needs: [build]
     runs-on: macos-latest
     steps:
@@ -62,4 +63,7 @@ jobs:
           cd gs
           brew install bash
           alias bash=$(brew --prefix)/bin/bash
-          bash ./gs install-deps dev
+          # Doesn't have permission on /opt/graphscope
+          # and one could not use brew with sudo
+          bash ./gs install-deps dev --prefix $HOME/graphscope
+          cat ~/.graphscope_env
