@@ -12,8 +12,7 @@ no_grape_v6d=${args[--no-grape-v6d]}
 v6d_version=${args[--v6d-version]}
 
 if [[ $(id -u) -ne 0 ]]; then
-  error "Not running as root."
-  exit 2
+  warning "Not running as root."
 else
   warning "Please note that I am running as root."
 fi

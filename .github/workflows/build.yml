@@ -31,25 +31,35 @@ jobs:
         name: generated-executive-script
         path: gs
 
-  test:
+  test-linux:
     name: Test install dependency
     needs: [build]
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04, macos-latest]
+        os: [ubuntu-22.04, ubuntu-20.04]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/download-artifact@v3
       with:
         name: generated-executive-script
         path: gs
-    - name: Prerequisites
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install bash
     - name: Install dev
       run: |
-        ls -la gs
         cd gs
-        alias bash=$(brew --prefix)/bin/bash || true
         sudo bash ./gs install-deps dev
+  test-macos:
+    name: Test install dependency
+    needs: [build]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: generated-executive-script
+          path: gs
+      - name: Install dev
+        run: |
+          ls -la gs
+          cd gs
+          brew install bash
+          alias bash=$(brew --prefix)/bin/bash
+          sudo bash ./gs install-deps dev
