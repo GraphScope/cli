@@ -104,7 +104,7 @@ commands:
     default: v0.11.2
 
 #  dependencies:
-#  - wget # TODO: ossutil? I think wget is better.
+#  - wget
 
 
   examples:

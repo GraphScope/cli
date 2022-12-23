@@ -6,9 +6,11 @@ install_cmake() {
   file="cmake-3.24.3-linux-${ARCH}.sh"
   log "Building and installing ${file}."
   pushd "${workdir}" || exit
+
   url="https://github.com/Kitware/CMake/releases/download/v3.24.3"
+  url=$(maybe_set_to_cn_url ${url})
   [ ! -f "${file}" ] &&
-    fetch_source "${file}" ${url}
+    fetch_source "${file}" "${url}"
   bash "${file}" --prefix="${install_prefix}" --skip-license
   popd || exit
   cleanup_files "${workdir}/${file}"
@@ -22,9 +24,10 @@ install_open_mpi() {
   directory="openmpi-4.0.5"
   file="openmpi-4.0.5.tar.gz"
   url="https://download.open-mpi.org/release/open-mpi/v4.0"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  download_tar_and_untar_if_not_exists ${directory} ${file} ${url}
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   pushd ${directory} || exit
 
   ./configure --enable-mpi-cxx --disable-dlopen --prefix=${MPI_PREFIX}
@@ -43,9 +46,10 @@ install_gflags() {
   directory="gflags-2.2.2"
   file="v2.2.2.tar.gz"
   url="https://github.com/gflags/gflags/archive"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing gflags-2.2.2."
   pushd "${workdir}" || exit
-  download_tar_and_untar_if_not_exists ${directory} ${file} ${url}
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   pushd ${directory} || exit
 
   cmake . -DCMAKE_INSTALL_PREFIX="${install_prefix}" \
@@ -65,9 +69,10 @@ install_glog() {
   directory="glog-0.6.0"
   file="v0.6.0.tar.gz"
   url="https://github.com/google/glog/archive"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  download_tar_and_untar_if_not_exists ${directory} ${file} ${url}
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   pushd ${directory} || exit
 
   cmake . -DCMAKE_INSTALL_PREFIX="${install_prefix}" \
@@ -87,9 +92,10 @@ install_apache_arrow() {
   directory="arrow-apache-arrow-9.0.0"
   file="apache-arrow-9.0.0.tar.gz"
   url="https://github.com/apache/arrow/archive"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  download_tar_and_untar_if_not_exists ${directory} ${file} ${url}
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   pushd ${directory} || exit
 
   cmake ./cpp \
@@ -147,9 +153,10 @@ install_boost() {
   directory="boost_1_74_0"
   file="${directory}.tar.gz"
   url="https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  download_tar_and_untar_if_not_exists ${directory} ${file} ${url}
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   pushd ${directory} || exit
 
   ./bootstrap.sh --prefix="${install_prefix}" \
@@ -167,9 +174,10 @@ install_openssl() {
   directory="openssl-OpenSSL_1_1_1h"
   file="OpenSSL_1_1_1h.tar.gz"
   url="https://github.com/openssl/openssl/archive"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  download_tar_and_untar_if_not_exists ${directory} ${file} ${url}
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   pushd ${directory} || exit
 
   ./config --prefix="${install_prefix}" -fPIC -shared
@@ -187,9 +195,10 @@ install_zlib() {
   directory="zlib-1.2.11"
   file="v1.2.11.tar.gz"
   url="https://github.com/madler/zlib/archive"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  download_tar_and_untar_if_not_exists ${directory} ${file} ${url}
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   pushd ${directory} || exit
 
   cmake . -DCMAKE_INSTALL_PREFIX="${install_prefix}" \
@@ -209,9 +218,10 @@ install_protobuf() {
   directory="protobuf-21.9"
   file="protobuf-all-21.9.tar.gz"
   url="https://github.com/protocolbuffers/protobuf/releases/download/v21.9"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  download_tar_and_untar_if_not_exists ${directory} ${file} ${url}
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   pushd ${directory} || exit
 
   ./configure --prefix="${install_prefix}" --enable-shared --disable-static
@@ -230,11 +240,12 @@ install_grpc() {
   directory="grpc"
   file="${directory}.tar.gz"
   url="https://github.com/grpc/grpc.git"
+  url=$(maybe_set_to_cn_url ${url})
   branch="v1.49.1"
   log "Building and installing ${directory}."
 
   pushd "${workdir}" || exit
-  clone_if_not_exists ${directory} ${file} ${url} ${branch}
+  clone_if_not_exists ${directory} ${file} "${url}" ${branch}
   pushd ${directory} || exit
 
   cmake . -DCMAKE_INSTALL_PREFIX="${install_prefix}" \
@@ -270,9 +281,10 @@ install_cppkafka() {
   directory="cppkafka-0.4.0"
   file="0.4.0.tar.gz"
   url="https://github.com/mfontanini/cppkafka/archive/refs/tags"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  download_tar_and_untar_if_not_exists ${directory} ${file} ${url}
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   pushd ${directory} || exit
 
   cmake . -DCMAKE_INSTALL_PREFIX="${install_prefix}" \
@@ -293,9 +305,10 @@ install_maven() {
   directory="apache-maven-3.8.6"
   file="apache-maven-3.8.6-bin.tar.gz"
   url="https://dlcdn.apache.org/maven/maven-3/3.8.6/binaries"
+  url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  download_tar_and_untar_if_not_exists ${directory} ${file} ${url}
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   cp -r ${directory} "${install_prefix}"/
 
   mkdir -p "${install_prefix}"/bin

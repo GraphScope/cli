@@ -28,15 +28,16 @@ BASIC_PACKAGES_TO_INSTALL=
 
 log "Installing ${type} dependencies for GraphScope on ${OS}..."
 
-if [[ -n $cn ]]; then
+if [[ -n ${cn} ]]; then
   log "Set to speed up downloading for CN locations."
   # export some mirror locations for CN, e.g., brew/docker...
   export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git"
   export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git"
   export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles"
+  export GRAPHSCOPE_DOWNLOAD_FROM_CN="true"
 fi
 
-if [[ -n $only_grape_v6d ]]; then
+if [[ -n ${only_grape_v6d} ]]; then
   log "Only install libgrape-lite and vineyard."
   if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
     install_grape_vineyard_macos

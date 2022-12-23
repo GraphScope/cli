@@ -42,7 +42,6 @@ function clone_if_not_exists {
 }
 
 function cleanup_files {
-
   if [ "${GRAPHSCOPE_NO_INSTALL_CLEANUP}" != "true" ]; then
     log "Cleaning up intermediate files [$*]"
     log "Disable this behaviour by setting GRAPHSCOPE_NO_INSTALL_CLEANUP=true."
@@ -54,4 +53,12 @@ function cleanup_files {
         fi
     done
   fi
+}
+
+function maybe_set_to_cn_url {
+  local url=$1
+  if [ "${GRAPHSCOPE_DOWNLOAD_FROM_CN}" == "true" ]; then
+    url="https://graphscope.oss-cn-beijing.aliyuncs.com/dependencies"
+  fi
+  echo ${url}
 }

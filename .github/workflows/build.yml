@@ -33,6 +33,7 @@ jobs:
 
   test:
     name: Test install dependency
+    needs: [build]
     strategy:
       matrix:
         os: [ubuntu-22.04, ubuntu-20.04, macos-latest]
@@ -45,4 +46,5 @@ jobs:
     - name: Install dev
       run: |
         ls -la
-        bash ./gs install-deps dev
+        bash ./gs install-deps dev || true
+        sudo bash ./gs install-deps dev
