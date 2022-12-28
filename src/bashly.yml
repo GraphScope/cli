@@ -78,18 +78,14 @@ commands:
 
   - long: --from-local
     short: -l
-    arg: from-local
-    help: Install deps from a local location. If the location is empty, it will download a tar with all deps from Web (via oss).
+    arg: location
+    default: /tmp/gs-local-deps
+    help: Install deps from a local location. If the location is empty, dependency files would be downloaded to [location].
 
   - long: --prefix
     arg: prefix
     help: Install dependency files to [prefix]. By default, './gs install-deps dev' will install all the files in '/opt/graphscope/bin', '/opt/graphscope/lib' etc. You can specify an installation prefix other than '/opt/graphscope' using '--prefix', for instance '--prefix=\$HOME'.
     default: /opt/graphscope
-
-  - long: --deps-prefix
-    arg: deps-prefix
-    help: Download dependency files to [deps-prefix]
-    default: /tmp/gs-deps
 
   - long: --no-grape-v6d
     short: -n

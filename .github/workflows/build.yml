@@ -52,7 +52,8 @@ jobs:
         cat /root/.graphscope_env
 
     - name: Get GraphScope Source
-      run: git clone --depth=1 https://github.com/alibaba/graphscope
+      run: |
+        git clone --depth=1 https://github.com/alibaba/graphscope
 
     - name: Build analytical engine
       run: |
@@ -78,6 +79,7 @@ jobs:
         make coordinator
 
     - name: Build client
+      if: false
       run: |
         cd graphscope
         source /root/.graphscope_dev
@@ -104,35 +106,36 @@ jobs:
           bash ./gs install-deps dev --prefix $HOME/graphscope
           cat ~/.graphscope_env
 
-    - name: Get GraphScope Source
-      run: git clone --depth=1 https://github.com/alibaba/graphscope
+      - name: Get GraphScope Source
+        run: git clone --depth=1 https://github.com/alibaba/graphscope
 
-    - name: Build analytical engine
-      run: |
-        cd graphscope
-        source ~/.graphscope_dev
-        make analytical
+      - name: Build analytical engine
+        run: |
+          cd graphscope
+          source ~/.graphscope_dev
+          make analytical
 
-    - name: Build interactive engine
-      run: |
-        cd graphscope
-        source ~/.graphscope_dev
-        make interactive
+      - name: Build interactive engine
+        run: |
+          cd graphscope
+          source ~/.graphscope_dev
+          make interactive
 
-    - name: Build learning engine
-      run: |
-        cd graphscope
-        source ~/.graphscope_dev
-        make learning
-    - name: Build coordinator
-      run: |
-        cd graphscope
-        source ~/.graphscope_dev
-        make coordinator
+      - name: Build learning engine
+        run: |
+          cd graphscope
+          source ~/.graphscope_dev
+          make learning
+      - name: Build coordinator
+        run: |
+          cd graphscope
+          source ~/.graphscope_dev
+          make coordinator
 
-    - name: Build client
-      run: |
-        cd graphscope
-        source ~/.graphscope_dev
-        make client
+      - name: Build client
+        if: false
+        run: |
+          cd graphscope
+          source ~/.graphscope_dev
+          make client
 
