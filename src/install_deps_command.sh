@@ -284,7 +284,7 @@ install_deps_macos() {
   export HOMEBREW_NO_INSTALL_CLEANUP=1
   export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
   # shellcheck disable=SC2086
-  brew install ${BASIC_PACKAGES_TO_INSTALL[*]} || true
+  brew install ${BASIC_PACKAGES_TO_INSTALL[*]}
 
   brew install llvm || true  # prevent the `brew link` failure
 
