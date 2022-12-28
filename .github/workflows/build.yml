@@ -47,7 +47,8 @@ jobs:
       run: |
         cd gs
         sudo bash ./gs install-deps dev
-        sudo chown 1001:121 /root/.graphscope_env
+        echo "uid $(id -u) gid $(id -g)"
+        sudo chown 1001:1001 /root/.graphscope_env
         # TODO: Using sudo will cause the env output location to root home
         cat /root/.graphscope_env
 
