@@ -47,7 +47,7 @@ jobs:
       run: |
         cd gs
         sudo bash ./gs install-deps dev
-        sudo chown 1001:121 /root/.graphscope_dev
+        sudo chown 1001:121 /root/.graphscope_env
         # TODO: Using sudo will cause the env output location to root home
         cat /root/.graphscope_env
 
@@ -58,31 +58,31 @@ jobs:
     - name: Build analytical engine
       run: |
         cd graphscope
-        source /root/.graphscope_dev
+        source /root/.graphscope_env
         make analytical
 
     - name: Build interactive engine
       run: |
         cd graphscope
-        source /root/.graphscope_dev
+        source /root/.graphscope_env
         make interactive
 
     - name: Build learning engine
       run: |
         cd graphscope
-        source /root/.graphscope_dev
+        source /root/.graphscope_env
         make learning
     - name: Build coordinator
       run: |
         cd graphscope
-        source /root/.graphscope_dev
+        source /root/.graphscope_env
         make coordinator
 
     - name: Build client
       if: false
       run: |
         cd graphscope
-        source /root/.graphscope_dev
+        source /root/.graphscope_env
         make client
 
   test-macos:
@@ -112,30 +112,30 @@ jobs:
       - name: Build analytical engine
         run: |
           cd graphscope
-          source ~/.graphscope_dev
+          source ~/.graphscope_env
           make analytical
 
       - name: Build interactive engine
         run: |
           cd graphscope
-          source ~/.graphscope_dev
+          source ~/.graphscope_env
           make interactive
 
       - name: Build learning engine
         run: |
           cd graphscope
-          source ~/.graphscope_dev
+          source ~/.graphscope_env
           make learning
       - name: Build coordinator
         run: |
           cd graphscope
-          source ~/.graphscope_dev
+          source ~/.graphscope_env
           make coordinator
 
       - name: Build client
         if: false
         run: |
           cd graphscope
-          source ~/.graphscope_dev
+          source ~/.graphscope_env
           make client
 

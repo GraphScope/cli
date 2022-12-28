@@ -286,7 +286,7 @@ install_deps_macos() {
   # shellcheck disable=SC2086
   brew install ${BASIC_PACKAGES_TO_INSTALL[*]} || true
 
-  brew install llvm
+  brew install llvm || true  # prevent the `brew link` failure
 
   install_java_maven_macos
 
@@ -348,6 +348,8 @@ write_env_config() {
       echo "export OPENSSL_ROOT_DIR=${homebrew_prefix}/opt/openssl"
       echo "export OPENSSL_LIBRARIES=${homebrew_prefix}/opt/openssl/lib"
       echo "export OPENSSL_SSL_LIBRARY=${homebrew_prefix}/opt/openssl/lib/libssl.dylib"
+      echo "export LDFLAGS=\"-L${homebrew_prefix}/opt/llvm/lib\""
+      echo "export CPPFLAGS=\"-I${homebrew_prefix}/opt/llvm/include\""
     } >>"${OUTPUT_ENV_FILE}"
 
   elif [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
