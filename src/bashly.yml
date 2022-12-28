@@ -17,9 +17,11 @@ environment_variables:
 commands:
 
 - name: build
+  alias: b
   help: Build GraphScope on local.
 
 - name: build-image
+  alias: bi
   help: Build GraphScope docker images.
 
   args:
@@ -60,6 +62,7 @@ commands:
   - docker
 
 - name: install-deps
+  alias: i
   help: Install dependencies on local machine.
 
   args:

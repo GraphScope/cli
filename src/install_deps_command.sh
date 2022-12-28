@@ -86,6 +86,9 @@ init_basic_packages() {
       rapidjson-dev
       libmsgpack-dev
       librdkafka-dev
+      llvm-11-dev
+      lld-11
+      clang-11
     )
   elif [[ "${OS_PLATFORM}" == *"CentOS"* ]]; then
     BASIC_PACKAGES_TO_INSTALL=(
@@ -109,6 +112,9 @@ init_basic_packages() {
         boost-devel
         gflags-devel
         glog-devel
+        llvm
+        lld
+        clang
       )
     elif [[ "${OS_VERSION}" -eq "7" ]]; then
       BASIC_PACKAGES_TO_INSTALL+=(centos-release-scl-rh)
@@ -118,6 +124,8 @@ init_basic_packages() {
         rh-python38-python-devel
         rapidjson-devel
         msgpack-devel
+        llvm
+        clang
       )
     fi
   else # darwin
