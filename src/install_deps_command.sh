@@ -4,7 +4,7 @@ type=${args[type]}
 # from-local=${args[--from-local]}
 cn=${args[--cn]}
 install_prefix=${args[--prefix]}
-deps_prefix=${args[--deps-prefix]}
+deps_prefix=${args[--from-local]}
 
 only_grape_v6d=${args[--only-grape-v6d]}
 no_grape_v6d=${args[--no-grape-v6d]}
@@ -86,6 +86,9 @@ init_basic_packages() {
       rapidjson-dev
       libmsgpack-dev
       librdkafka-dev
+      llvm-11-dev
+      lld-11
+      clang-11
     )
   elif [[ "${OS_PLATFORM}" == *"CentOS"* ]]; then
     BASIC_PACKAGES_TO_INSTALL=(
@@ -109,6 +112,9 @@ init_basic_packages() {
         boost-devel
         gflags-devel
         glog-devel
+        llvm
+        lld
+        clang
       )
     elif [[ "${OS_VERSION}" -eq "7" ]]; then
       BASIC_PACKAGES_TO_INSTALL+=(centos-release-scl-rh)
@@ -118,6 +124,8 @@ init_basic_packages() {
         rh-python38-python-devel
         rapidjson-devel
         msgpack-devel
+        llvm
+        clang
       )
     fi
   else # darwin
@@ -276,9 +284,9 @@ install_deps_macos() {
   export HOMEBREW_NO_INSTALL_CLEANUP=1
   export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
   # shellcheck disable=SC2086
-  brew install ${BASIC_PACKAGES_TO_INSTALL[*]} || true
+  brew install ${BASIC_PACKAGES_TO_INSTALL[*]}
 
-  brew install llvm
+  brew install llvm || true  # prevent the `brew link` failure
 
   install_java_maven_macos
 
@@ -340,6 +348,8 @@ write_env_config() {
       echo "export OPENSSL_ROOT_DIR=${homebrew_prefix}/opt/openssl"
       echo "export OPENSSL_LIBRARIES=${homebrew_prefix}/opt/openssl/lib"
       echo "export OPENSSL_SSL_LIBRARY=${homebrew_prefix}/opt/openssl/lib/libssl.dylib"
+      echo "export LDFLAGS=\"-L${homebrew_prefix}/opt/llvm/lib\""
+      echo "export CPPFLAGS=\"-I${homebrew_prefix}/opt/llvm/include\""
     } >>"${OUTPUT_ENV_FILE}"
 
   elif [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then

@@ -47,8 +47,46 @@ jobs:
       run: |
         cd gs
         sudo bash ./gs install-deps dev
+        echo "uid $(id -u) gid $(id -g)"
+        sudo chown 1001:123 /root/.graphscope_env
         # TODO: Using sudo will cause the env output location to root home
-        sudo cat /root/.graphscope_env
+        cat /root/.graphscope_env
+
+    - name: Get GraphScope Source
+      run: |
+        git clone --depth=1 https://github.com/alibaba/graphscope
+
+    - name: Build analytical engine
+      run: |
+        cd graphscope
+        source /root/.graphscope_env
+        make analytical
+
+    - name: Build interactive engine
+      run: |
+        cd graphscope
+        source /root/.graphscope_env
+        make interactive
+
+    - name: Build learning engine
+      run: |
+        cd graphscope
+        source /root/.graphscope_env
+        make learning
+
+    - name: Build coordinator
+      run: |
+        cd graphscope
+        source /root/.graphscope_env
+        make coordinator
+
+    - name: Build client
+      if: false
+      run: |
+        cd graphscope
+        source /root/.graphscope_env
+        make client
+
   test-macos:
     name: Test install dependency (macos-latest)
     needs: [build]
@@ -69,3 +107,38 @@ jobs:
           # and one could not use brew with sudo
           bash ./gs install-deps dev --prefix $HOME/graphscope
           cat ~/.graphscope_env
+
+      - name: Get GraphScope Source
+        run: git clone --depth=1 https://github.com/alibaba/graphscope
+
+      - name: Build analytical engine
+        run: |
+          cd graphscope
+          source ~/.graphscope_env
+          make analytical
+
+      - name: Build interactive engine
+        run: |
+          cd graphscope
+          source ~/.graphscope_env
+          make interactive
+
+      - name: Build learning engine
+        if: false  # Known error that learning-engine cannot build with llvm c++17. Remove this after fixed.
+        run: |
+          cd graphscope
+          source ~/.graphscope_env
+          make learning
+      - name: Build coordinator
+        run: |
+          cd graphscope
+          source ~/.graphscope_env
+          make coordinator
+
+      - name: Build client
+        if: false
+        run: |
+          cd graphscope
+          source ~/.graphscope_env
+          make client
+
