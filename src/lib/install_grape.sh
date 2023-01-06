@@ -1,6 +1,7 @@
 install_grape() {
   workdir=$1
   install_prefix=$2
+  jobs=${3:-4} # $3:default=4
 
   if [[ -f "${install_prefix}/include/grape/grape.h" ]]; then
     log "libgrape-lite already installed, skip."
@@ -22,7 +23,7 @@ install_grape() {
 
   cmake . -DCMAKE_INSTALL_PREFIX="${install_prefix}" \
           -DCMAKE_PREFIX_PATH="${install_prefix}"
-  make -j$(nproc)
+  make -j${jobs}
   make install
   strip "${install_prefix}/bin/run_app"
   popd || exit
