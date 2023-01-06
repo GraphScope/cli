@@ -102,17 +102,19 @@ commands:
     help: v6d version to clone
     default: v0.11.3
 
+  - long: --jobs
+    short: -j
+    arg: jobs
+    help: Concurrent jobs in building, i.e., -j argument passed to make.
+
 #  dependencies:
 #  - wget
-
 
   examples:
   - gs install-deps client
   - gs install-deps dev
   - gs install-deps dev --cn
+  - gs install-deps dev --cn -j 6
   - gs install-deps dev --from-local ~/Downloads/gs-all-deps
   - gs install-deps dev --no-grape-v6d
   - gs install-deps dev --only-grape-v6d
-
-- name: spark-classpath
-  help: Generate classpath for spark jobs.

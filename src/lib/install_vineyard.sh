@@ -2,6 +2,7 @@ install_vineyard() {
   workdir=$1
   install_prefix=$2
   v6d_version=$3
+  jobs=${4:-4} # $4:default=4
   V6D_PREFIX="/opt/vineyard"  # fixed, related to coordinator/setup.py
 
   if command -v vineyardd &> /dev/null && \
@@ -29,7 +30,7 @@ install_vineyard() {
         -DBUILD_VINEYARD_TESTS=OFF \
         -DBUILD_SHARED_LIBS=ON \
         -DBUILD_VINEYARD_PYTHON_BINDINGS=ON
-  make -j$(nproc)
+  make -j${jobs}
   make install
   strip "${V6D_PREFIX}"/bin/vineyard* "${V6D_PREFIX}"/lib/libvineyard*
   python3 setup.py bdist_wheel

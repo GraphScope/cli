@@ -1,7 +1,6 @@
 inspect_args
 
 type=${args[type]}
-# from-local=${args[--from-local]}
 cn=${args[--cn]}
 install_prefix=${args[--prefix]}
 deps_prefix=${args[--from-local]}
@@ -10,6 +9,8 @@ only_grape_v6d=${args[--only-grape-v6d]}
 no_grape_v6d=${args[--no-grape-v6d]}
 
 v6d_version=${args[--v6d-version]}
+
+jobs=${args[--jobs]}
 
 if [[ $(id -u) -ne 0 ]]; then
   warning "Not running as root."
@@ -149,8 +150,8 @@ install_grape_vineyard_linux() {
   log "Installing python packages for vineyard codegen."
   pip3 install pip -U --user
   pip3 install libclang wheel --user
-  install_grape "${deps_prefix}" "${install_prefix}"
-  install_vineyard "${deps_prefix}" "${install_prefix}" "${v6d_version}"
+  install_grape "${deps_prefix}" "${install_prefix}" "${jobs}"
+  install_vineyard "${deps_prefix}" "${install_prefix}" "${v6d_version}" "${jobs}"
 }
 
 install_grape_vineyard_macos() {
