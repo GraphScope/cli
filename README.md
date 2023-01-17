@@ -20,6 +20,16 @@ Get the latest build of the script from artifacts in [Actions](https://github.co
 
 ### Install ruby >= 2.7
 
+#### MacOS
+```bash
+brew install ruby
+gem install bashly
+
+# MacOS bundled with an older bash v3, need to install a newer one which version >= 4
+brew install bash
+# Optional: Activate new bash
+bash
+```
 #### Ubuntu 20.04 +
 ```bash
 apt update -y && apt install ruby gem -y

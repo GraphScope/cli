@@ -2,7 +2,7 @@ inspect_args
 
 type=${args[type]}
 cn=${args[--cn]}
-install_prefix=${args[--prefix]}
+install_prefix=${args[--install-prefix]}
 deps_prefix=${args[--from-local]}
 
 only_grape_v6d=${args[--only-grape-v6d]}

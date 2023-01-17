@@ -21,10 +21,14 @@ jobs:
       with:
         ruby-version: 3.1.x
 
-    - name: install bash.ly and build
+    - name: Install bash.ly and build
       run: |
         gem install bashly
         bashly generate
+
+    - name: Insert friendly prompt
+      run: |
+        sed -i '8i \  \printf "If you are using MacOS, run the following command to get a newer bash: \\n  brew install bash && bash\\n" >&2' ./gs
         
     - uses: actions/upload-artifact@v3
       with:
@@ -36,7 +40,7 @@ jobs:
     needs: [build]
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-20.04]
+        os: [ubuntu-22.04, ubuntu-20.04, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/download-artifact@v3
@@ -44,13 +48,27 @@ jobs:
         name: generated-executive-script
         path: gs
     - name: Install dev
+      if: runner.os == 'Linux'
       run: |
         cd gs
-        sudo bash ./gs install-deps dev
-        echo "uid $(id -u) gid $(id -g)"
-        sudo chown 1001:123 /root/.graphscope_env
         # TODO: Using sudo will cause the env output location to root home
-        cat /root/.graphscope_env
+        sudo bash ./gs install-deps dev
+        sudo cp /root/.graphscope_env ~/.graphscope_env
+        sudo chown $(id -u):$(id -g) ~/.graphscope_env
+        ls -la ~/.graphscope_dev
+        cat ~/.graphscope_env
+
+    - name: Install dev
+      if: runner.os == 'macOS'
+      run: |
+        cd gs
+        brew update
+        brew install bash
+        alias bash=$(brew --prefix)/bin/bash
+        # Doesn't have permission on /opt/graphscope
+        # and one could not use brew with sudo
+        bash ./gs install-deps dev --install-prefix $HOME/graphscope
+        cat ~/.graphscope_env
 
     - name: Get GraphScope Source
       run: |
@@ -59,86 +77,31 @@ jobs:
     - name: Build analytical engine
       run: |
         cd graphscope
-        source /root/.graphscope_env
+        source ~/.graphscope_env
         make analytical
 
     - name: Build interactive engine
       run: |
         cd graphscope
-        source /root/.graphscope_env
+        source ~/.graphscope_env
         make interactive
 
     - name: Build learning engine
       run: |
         cd graphscope
-        source /root/.graphscope_env
+        source ~/.graphscope_env
         make learning
 
     - name: Build coordinator
+      if: false  # Known issue with pyarrow 6.0, remove after fixed
       run: |
         cd graphscope
-        source /root/.graphscope_env
+        source ~/.graphscope_env
         make coordinator
 
     - name: Build client
       if: false
       run: |
         cd graphscope
-        source /root/.graphscope_env
+        source ~/.graphscope_env
         make client
-
-  test-macos:
-    name: Test install dependency (macos-latest)
-    needs: [build]
-    runs-on: macos-latest
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: generated-executive-script
-          path: gs
-      - name: Install dev
-        run: |
-          ls -la gs
-          cd gs
-          brew update
-          brew install bash
-          alias bash=$(brew --prefix)/bin/bash
-          # Doesn't have permission on /opt/graphscope
-          # and one could not use brew with sudo
-          bash ./gs install-deps dev --prefix $HOME/graphscope
-          cat ~/.graphscope_env
-
-      - name: Get GraphScope Source
-        run: git clone --depth=1 https://github.com/alibaba/graphscope
-
-      - name: Build analytical engine
-        run: |
-          cd graphscope
-          source ~/.graphscope_env
-          make analytical
-
-      - name: Build interactive engine
-        run: |
-          cd graphscope
-          source ~/.graphscope_env
-          make interactive
-
-      - name: Build learning engine
-        if: false  # Known error that learning-engine cannot build with llvm c++17. Remove this after fixed.
-        run: |
-          cd graphscope
-          source ~/.graphscope_env
-          make learning
-      - name: Build coordinator
-        run: |
-          cd graphscope
-          source ~/.graphscope_env
-          make coordinator
-
-      - name: Build client
-        if: false
-        run: |
-          cd graphscope
-          source ~/.graphscope_env
-          make client
-
