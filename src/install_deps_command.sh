@@ -148,8 +148,8 @@ init_basic_packages() {
 
 install_grape_vineyard_linux() {
   log "Installing python packages for vineyard codegen."
-  pip3 install pip -U --user
-  pip3 install libclang wheel --user
+  pip3 --no-cache-dir install pip -U --user
+  pip3 --no-cache-dir install libclang wheel --user
   install_grape "${deps_prefix}" "${install_prefix}" "${jobs}"
   install_vineyard "${deps_prefix}" "${install_prefix}" "${v6d_version}" "${jobs}"
 }
@@ -180,21 +180,19 @@ install_rust_universal() {
 
 install_java_maven_ubuntu() {
   if ! command -v javac &>/dev/null; then
-    # log "Installing openjdk-8-jdk"
-    # apt-get install openjdk-8-jdk -y
     log "Installing default-jdk"
-    apt-get install default-jdk -y
+    sudo apt-get install default-jdk -y
   fi
   if ! command -v mvn &>/dev/null; then
     log "Installing maven"
-    apt-get install maven -y
+    sudo apt-get install maven -y
   fi
 }
 
 install_java_maven_centos() {
   if ! command -v javac &>/dev/null; then
     log "Installing java-1.8.0-openjdk-devel"
-    yum install java-1.8.0-openjdk-devel -y
+    sudo yum install java-1.8.0-openjdk-devel -y
   fi
   if ! command -v mvn &>/dev/null; then
     log "Installing maven"
@@ -219,16 +217,16 @@ install_apache_arrow_ubuntu() {
   # shellcheck disable=SC2046,SC2019,SC2018
   wget -c https://apache.jfrog.io/artifactory/arrow/"$(lsb_release --id --short | tr 'A-Z' 'a-z')"/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
     -P /tmp/
-  apt-get install -y -V /tmp/apache-arrow-apt-source-latest-"$(lsb_release --codename --short)".deb
-  apt-get update -y && apt-get install -y libarrow-dev
+  sudo apt-get install -y -V /tmp/apache-arrow-apt-source-latest-"$(lsb_release --codename --short)".deb
+  sudo apt-get update -y && sudo apt-get install -y libarrow-dev
   rm /tmp/apache-arrow-apt-source-latest-*.deb
 }
 
 install_deps_ubuntu() {
   log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
   # shellcheck disable=SC2086
-  apt-get update -y
-  DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y ${BASIC_PACKAGES_TO_INSTALL[*]}
+  sudo apt-get update -y
+  DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC sudo apt-get install -y ${BASIC_PACKAGES_TO_INSTALL[*]}
 
   install_apache_arrow_ubuntu
   install_java_maven_ubuntu
@@ -237,10 +235,10 @@ install_deps_ubuntu() {
 install_deps_centos_pre() {
     log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
     # shellcheck disable=SC2086
-    yum install -y ${BASIC_PACKAGES_TO_INSTALL[*]}
+    sudo yum install -y ${BASIC_PACKAGES_TO_INSTALL[*]}
     log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
     # shellcheck disable=SC2086
-    yum install -y ${ADDITIONAL_PACKAGES[*]}
+    sudo yum install -y ${ADDITIONAL_PACKAGES[*]}
     install_cmake  "${deps_prefix}" "${install_prefix}"
 }
 
@@ -271,10 +269,10 @@ install_deps_centos7() {
 install_deps_centos8() {
   sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
   sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-  yum install -y 'dnf-command(config-manager)'
-  dnf install -y epel-release
-  dnf config-manager --set-enabled epel
-  dnf config-manager --set-enabled powertools
+  sudo yum install -y 'dnf-command(config-manager)'
+  sudo dnf install -y epel-release
+  sudo dnf config-manager --set-enabled epel
+  sudo dnf config-manager --set-enabled powertools
 
   install_deps_centos_pre
   install_deps_centos_after
@@ -402,11 +400,11 @@ install_deps_for_dev() {
 install_deps_for_client() {
   # install python..
   # TODO: refine
-  pip3 install -U pip
+  pip3 --no-cache-dir install -U pip --user
   pip3 --no-cache-dir install auditwheel==5.0.0 daemons etcd-distro gremlinpython \
           hdfs3 fsspec oss2 s3fs ipython kubernetes libclang networkx==2.4 numpy pandas parsec pycryptodome \
-          pyorc pytest scipy scikit_learn wheel
-  pip3 --no-cache-dir install Cython --pre -U
+          pyorc pytest scipy scikit_learn wheel --user
+  pip3 --no-cache-dir install Cython --pre -U --user
 }
 
 # run subcommand with the type

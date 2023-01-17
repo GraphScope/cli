@@ -26,10 +26,6 @@ jobs:
         gem install bashly
         bashly generate
 
-    - name: Insert friendly prompt
-      run: |
-        sed -i '8i \  \printf "If you are using MacOS, run the following command to get a newer bash: \\n  brew install bash && bash\\n" >&2' ./gs
-        
     - uses: actions/upload-artifact@v3
       with:
         name: generated-executive-script
