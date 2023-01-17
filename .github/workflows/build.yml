@@ -47,27 +47,17 @@ jobs:
       with:
         name: generated-executive-script
         path: gs
-    - name: Install dev
-      if: runner.os == 'Linux'
-      run: |
-        cd gs
-        # TODO: Using sudo will cause the env output location to root home
-        sudo bash ./gs install-deps dev
-        sudo cp /root/.graphscope_env ~/.graphscope_env
-        sudo chown $(id -u):$(id -g) ~/.graphscope_env
-        ls -la ~/.graphscope_dev
-        cat ~/.graphscope_env
 
     - name: Install dev
-      if: runner.os == 'macOS'
       run: |
-        cd gs
-        brew update
-        brew install bash
-        alias bash=$(brew --prefix)/bin/bash
-        # Doesn't have permission on /opt/graphscope
-        # and one could not use brew with sudo
-        bash ./gs install-deps dev --install-prefix $HOME/graphscope
+        if [ "$RUNNER_OS" == "macOS" ]; then
+            brew update
+            brew install bash
+            alias bash=$(brew --prefix)/bin/bash
+        fi
+        sudo mkdir /opt/graphscope
+        sudo chown -R $(id -u):$(id -g) /opt/graphscope
+        bash gs/gs install-deps dev --install-prefix /opt/graphscope
         cat ~/.graphscope_env
 
     - name: Get GraphScope Source
