@@ -20,6 +20,13 @@ commands:
   alias: b
   help: Build GraphScope on local.
 
+  args:
+  - name: component
+    help: component to build.
+    allowed: [all, analytical, interactive, learning, client, coordinator]
+    required: false
+
+
 - name: build-image
   alias: bi
   help: Build GraphScope docker images.
@@ -28,7 +35,7 @@ commands:
   - name: image
     help: Images to build.
     # Whitelist + required
-    allowed: [graphscope-dev-base, graphscope-dev, coordinator, analytical, interactive-frontend, interactive-executor, learning]
+    allowed: [graphscope-dev-base, graphscope-dev, coordinator, analytical, analytical-java, interactive, interactive-frontend, interactive-executor, learning, vineyard-dev, vineyard-runtime]
     required: true
   
   flags:
@@ -38,7 +45,7 @@ commands:
 
   examples:
   - gs build-image graphscope-dev
-  - gs build-image graphscope-dev -cn
+  - gs build-image graphscope-dev --cn
   - gs build-image analytical
 
   dependencies:
@@ -78,13 +85,13 @@ commands:
 
   - long: --from-local
     short: -l
-    arg: location
+    arg: directory
     default: /tmp/gs-local-deps
-    help: Install deps from a local location. If the location is empty, dependency files would be downloaded to [location].
+    help: Find raw dependencies of GraphScope from a local directory. The raw dependencies would then be built and installed to [prefix]. If the directory is empty or not exists, dependency files would be downloaded to [directory].
 
-  - long: --prefix
+  - long: --install-prefix
     arg: prefix
-    help: Install dependency files to [prefix]. By default, './gs install-deps dev' will install all the files in '/opt/graphscope/bin', '/opt/graphscope/lib' etc. You can specify an installation prefix other than '/opt/graphscope' using '--prefix', for instance '--prefix=\$HOME'.
+    help: Install dependency files to [prefix]. By default, './gs install-deps dev' will install all the files in '/opt/graphscope/bin', '/opt/graphscope/lib' etc. You can specify an installation prefix other than '/opt/graphscope' using '--install-prefix', for instance '--install-prefix=\$HOME'.
     default: /opt/graphscope
 
   - long: --no-grape-v6d
@@ -100,15 +107,12 @@ commands:
   - long: --v6d-version
     arg: v6d-version
     help: v6d version to clone
-    default: v0.11.3
+    default: main
 
   - long: --jobs
     short: -j
     arg: jobs
     help: Concurrent jobs in building, i.e., -j argument passed to make.
-
-#  dependencies:
-#  - wget
 
   examples:
   - gs install-deps client
@@ -116,5 +120,6 @@ commands:
   - gs install-deps dev --cn
   - gs install-deps dev --cn -j 6
   - gs install-deps dev --from-local ~/Downloads/gs-all-deps
+  - gs install-deps dev --install-prefix ~/gs
   - gs install-deps dev --no-grape-v6d
   - gs install-deps dev --only-grape-v6d

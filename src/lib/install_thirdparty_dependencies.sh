@@ -114,8 +114,8 @@ install_apache_arrow() {
     return 0
   fi
 
-  directory="arrow-apache-arrow-9.0.0"
-  file="apache-arrow-9.0.0.tar.gz"
+  directory="arrow-apache-arrow-10.0.1"
+  file="apache-arrow-10.0.1.tar.gz"
   url="https://github.com/apache/arrow/archive"
   url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
