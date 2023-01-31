@@ -180,7 +180,7 @@ install_basic_packages_universal() {
   if [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
     ${SUDO} apt-get update -y
     DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC ${SUDO} apt-get install -y ${BASIC_PACKAGES_UBUNTU[*]}
-  else
+  elif [[ "${OS_PLATFORM}" == *"CentOS"* ]]; then
     if [[ "${OS_VERSION}" -eq "7" ]]; then
       ${SUDO} yum install -y ${BASIC_PACKAGES_CENTOS_7[*]}
       ${SUDO} yum install -y ${ADDITIONAL_PACKAGES_CENTOS_7[*]}
