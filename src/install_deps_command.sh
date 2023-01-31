@@ -59,7 +59,7 @@ BASIC_PACKAGES_UBUNTU=("${BASIC_PACKAGES_LINUX[@]}" "build-essential" "cmake" "l
 BASIC_PACKAGES_CENTOS_8=("${BASIC_PACKAGES_LINUX[@]}" "epel-release" "libunwind-devel" "perl" "which")
 BASIC_PACKAGES_CENTOS_7=("${BASIC_PACKAGES_CENTOS_8[@]}" "centos-release-scl-rh")
 ADDITIONAL_PACKAGES_CENTOS_8=("gcc-c++" "python38-devel")
-ADDITIONAL_PACKAGES_CENTOS_7=("devtoolset-8-gcc-c++" "rh-python38-python-pip" "rh-python38-python-devel")
+ADDITIONAL_PACKAGES_CENTOS_7=("make" "devtoolset-8-gcc-c++" "rh-python38-python-pip" "rh-python38-python-devel")
 
 ANALYTICAL_UBUNTU=(
   "libboost-all-dev"
