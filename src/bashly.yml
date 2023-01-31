@@ -107,6 +107,9 @@ commands:
   - long: --for-analytical
     help: Only install analytical engine dependencies
 
+  - long: --no-v6d
+    help: Do not install v6d, for build base docker images, could only be used with '--for-analytical'
+
   examples:
   - gs install-deps client
   - gs install-deps dev

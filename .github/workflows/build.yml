@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  generate:
     name: Build + Publish
     runs-on: ubuntu-latest
     permissions:
@@ -31,9 +31,9 @@ jobs:
         name: generated-executive-script
         path: gs
 
-  test-linux:
+  test-on-ubuntu-macos:
     name: Test install dependency
-    needs: [build]
+    needs: [generate]
     strategy:
       matrix:
         os: [ubuntu-22.04, ubuntu-20.04, macos-latest]
@@ -57,26 +57,16 @@ jobs:
         cat ~/.graphscope_env
 
     - name: Get GraphScope Source
-      run: |
-        git clone --depth=1 https://github.com/alibaba/graphscope
+      run: git clone --depth=1 https://github.com/alibaba/graphscope
 
     - name: Build analytical engine
-      run: |
-        cd graphscope
-        source ~/.graphscope_env
-        make analytical
+      run: source ~/.graphscope_env && cd graphscope && make analytical
 
     - name: Build interactive engine
-      run: |
-        cd graphscope
-        source ~/.graphscope_env
-        make interactive
+      run: source ~/.graphscope_env && cd graphscope && make interactive
 
     - name: Build learning engine
-      run: |
-        cd graphscope
-        source ~/.graphscope_env
-        make learning
+      run: source ~/.graphscope_env && cd graphscope && make learning
 
     - name: Build coordinator
       if: false  # Known issue with pyarrow 6.0, remove after fixed
@@ -91,3 +81,59 @@ jobs:
         cd graphscope
         source ~/.graphscope_env
         make client
+
+  test-on-centos-8:
+    needs: [ generate ]
+    runs-on: ubuntu-22.04
+    container:
+      image: centos:latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: generated-executive-script
+          path: gs
+
+      - name: Install dev
+        run: |
+          bash gs/gs install-deps dev --install-prefix /opt/graphscope
+          cat ~/.graphscope_env
+
+      - name: Get GraphScope Source
+        run: git clone --depth=1 https://github.com/alibaba/graphscope
+
+      - name: Build analytical engine
+        run: source ~/.graphscope_env && cd graphscope && make analytical
+
+      - name: Build interactive engine
+        run: source ~/.graphscope_env && cd graphscope && make interactive
+
+      - name: Build learning engine
+        run: source ~/.graphscope_env && cd graphscope && make learning
+
+  test-on-centos-7:
+    needs: [ generate ]
+    runs-on: ubuntu-22.04
+    container:
+      image: centos:7
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: generated-executive-script
+          path: gs
+
+      - name: Install dev
+        run: |
+          bash gs/gs install-deps dev --install-prefix /opt/graphscope
+          cat ~/.graphscope_env
+
+      - name: Get GraphScope Source
+        run: git clone --depth=1 https://github.com/alibaba/graphscope
+
+      - name: Build analytical engine
+        run: source ~/.graphscope_env && cd graphscope && make analytical
+
+      - name: Build interactive engine
+        run: source ~/.graphscope_env && cd graphscope && make interactive
+
+      - name: Build learning engine
+        run: source ~/.graphscope_env && cd graphscope && make learning

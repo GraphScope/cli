@@ -13,7 +13,6 @@ Get the latest build of the script from artifacts in [Actions](https://github.co
 ```bash
 > # for detailed usage
 > ./gs
-    
 ```
 
 ## Develop

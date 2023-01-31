@@ -4,12 +4,11 @@ type=${args[type]}
 cn=${args[--cn]}
 install_prefix=${args[--install-prefix]}
 deps_prefix=${args[--from-local]}
-
-for_analytical=${args[--for-analyical]}
-
 v6d_version=${args[--v6d-version]}
-
 jobs=${args[--jobs]}
+
+for_analytical=${args[--for-analytical]}
+no_v6d=${args[--no-v6d]}
 
 SUDO=sudo
 if [[ $(id -u) -eq 0 ]]; then
@@ -253,7 +252,6 @@ install_dependencies_analytical_universal() {
       _install_dependencies_analytical_centos8
     fi
   fi
-  install_grape_vineyard_universal
 }
 
 write_env_config() {
@@ -325,8 +323,12 @@ install_deps_for_dev() {
   install_basic_packages_universal
   if [[ -n ${for_analytical} ]]; then
     install_dependencies_analytical_universal
+    if [[ -n ${no_v6d} ]]; then
+      install_grape_vineyard_universal
+    fi
   else # for all
     install_dependencies_analytical_universal
+    install_grape_vineyard_universal
     install_java_maven_universal
     install_llvm_universal
     install_rust_universal
@@ -337,8 +339,8 @@ install_deps_for_dev() {
 
   succ "The script has installed all dependencies for building GraphScope, use commands:\n
   $ source ${OUTPUT_ENV_FILE}
-  $ make install\n
-  to build and develop GraphScope."
+  $ make install
+  \nto build and develop GraphScope."
 }
 
 install_deps_for_client() {

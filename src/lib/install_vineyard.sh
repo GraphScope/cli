@@ -1,3 +1,37 @@
+install_grape() {
+  workdir=$1
+  install_prefix=$2
+  jobs=${3:-4} # $3:default=4
+
+  if [[ -f "${install_prefix}/include/grape/grape.h" ]]; then
+    log "libgrape-lite already installed, skip."
+    return 0
+  fi
+  directory="libgrape-lite"
+  branch="master"
+  file="${directory}-${branch}.tar.gz"
+  url="https://github.com/alibaba/libgrape-lite.git"
+  url=$(maybe_set_to_cn_url ${url})
+  log "Building and installing ${directory}."
+  pushd "${workdir}" || exit
+  if [[ ${url} == *.git ]]; then
+    clone_if_not_exists ${directory} ${file} "${url}" ${branch}
+  else
+    download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
+  fi
+  pushd ${directory} || exit
+
+  cmake . -DCMAKE_INSTALL_PREFIX="${install_prefix}" \
+          -DCMAKE_PREFIX_PATH="${install_prefix}"
+  make -j${jobs}
+  make install
+  strip "${install_prefix}/bin/run_app"
+  popd || exit
+  popd || exit
+  cleanup_files "${workdir}/${directory}" "${workdir}/${file}"
+}
+
+
 install_vineyard() {
   workdir=$1
   install_prefix=$2
@@ -14,7 +48,7 @@ install_vineyard() {
   file="${directory}-${v6d_version}.tar.gz"
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  if [[ "${v6d_version}" == "v"* ]]; then
+  if [[ "${v6d_version}" != "v"* ]]; then
     url="https://github.com/v6d-io/v6d.git"
     clone_if_not_exists ${directory} "${file}" "${url}" "${v6d_version}"
   else
