@@ -301,10 +301,12 @@ write_env_config() {
       if [[ "${OS_VERSION}" -eq "7" ]]; then
         echo "source /opt/rh/devtoolset-8/enable"
         echo "source /opt/rh/rh-python38/enable"
+        echo "source /opt/rh/llvm-toolset-7.0/enable || true"
       fi
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/java"
       fi
+      echo "export LIBCLANG_PATH=/opt/rh/llvm-toolset-7.0/root/usr/lib64/"
     } >>"${OUTPUT_ENV_FILE}"
   fi
 }
