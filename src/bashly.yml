@@ -35,7 +35,7 @@ commands:
   - name: image
     help: Images to build.
     # Whitelist + required
-    allowed: [graphscope-dev-base, graphscope-dev, coordinator, analytical, analytical-java, interactive, interactive-frontend, interactive-executor, learning, vineyard-dev, vineyard-runtime]
+    allowed: [all, graphscope-dev-base, graphscope-dev, coordinator, analytical, analytical-java, interactive, interactive-frontend, interactive-executor, learning, vineyard-dev, vineyard-runtime]
     required: true
   
   flags:
@@ -66,7 +66,7 @@ commands:
   - gs dev --local /home/bar/graphscope
 
   dependencies:
-  - docker
+    docker: see https://docker.com for installation instructions
 
 - name: install-deps
   alias: i
@@ -94,16 +94,6 @@ commands:
     help: Install dependency files to [prefix]. By default, './gs install-deps dev' will install all the files in '/opt/graphscope/bin', '/opt/graphscope/lib' etc. You can specify an installation prefix other than '/opt/graphscope' using '--install-prefix', for instance '--install-prefix=\$HOME'.
     default: /opt/graphscope
 
-  - long: --no-grape-v6d
-    short: -n
-    help: Install deps but not grape/v6d, for building a docker images relatively stable.
-    conflicts: [--only-grape-v6d]
-
-  - long: --only-grape-v6d
-    short: -o
-    help: Only install latest grape and v6d.
-    conflicts: [--no-grape-v6d]
-
   - long: --v6d-version
     arg: v6d-version
     help: v6d version to clone
@@ -114,6 +104,9 @@ commands:
     arg: jobs
     help: Concurrent jobs in building, i.e., -j argument passed to make.
 
+  - long: --for-analytical
+    help: Only install analytical engine dependencies
+
   examples:
   - gs install-deps client
   - gs install-deps dev
@@ -121,5 +114,3 @@ commands:
   - gs install-deps dev --cn -j 6
   - gs install-deps dev --from-local ~/Downloads/gs-all-deps
   - gs install-deps dev --install-prefix ~/gs
-  - gs install-deps dev --no-grape-v6d
-  - gs install-deps dev --only-grape-v6d
