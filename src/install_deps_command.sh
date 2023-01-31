@@ -53,7 +53,7 @@ check_os_compatibility() {
   log "Running on ${OS_PLATFORM} ${OS_VERSION}"
 }
 
-BASIC_PACKAGES_LINUX=("file" "curl" "wget" "git" "sudo" "which")
+BASIC_PACKAGES_LINUX=("file" "curl" "wget" "git" "sudo")
 
 BASIC_PACKAGES_UBUNTU=("${BASIC_PACKAGES_LINUX[@]}" "build-essential" "cmake" "libunwind-dev" "python3-pip")
 
