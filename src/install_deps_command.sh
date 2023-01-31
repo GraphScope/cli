@@ -59,7 +59,7 @@ BASIC_PACKAGES_UBUNTU=("${BASIC_PACKAGES_LINUX[@]}" "build-essential" "cmake" "l
 BASIC_PACKAGES_CENTOS_8=("${BASIC_PACKAGES_LINUX[@]}" "epel-release" "libunwind-devel" "perl" "which")
 BASIC_PACKAGES_CENTOS_7=("${BASIC_PACKAGES_CENTOS_8[@]}" "centos-release-scl-rh")
 ADDITIONAL_PACKAGES_CENTOS_8=("gcc-c++" "python38-devel")
-ADDITIONAL_PACKAGES_CENTOS_7=("devtoolset-10-gcc-c++" "rh-python38-python-pip" "rh-python38-python-devel")
+ADDITIONAL_PACKAGES_CENTOS_7=("devtoolset-8-gcc-c++" "rh-python38-python-pip" "rh-python38-python-devel")
 
 ANALYTICAL_UBUNTU=(
   "libboost-all-dev"
@@ -156,7 +156,7 @@ _install_dependencies_analytical_centos8() {
 }
 _install_dependencies_analytical_centos7() {
   ${SUDO} yum install -y ${ANALYTICAL_CENTOS_7[*]}
-  source /opt/rh/devtoolset-10/enable
+  source /opt/rh/devtoolset-8/enable
   source /opt/rh/rh-python38/enable
   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${install_prefix}/lib:${install_prefix}/lib64
 
@@ -236,7 +236,13 @@ install_llvm_universal() {
   elif [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
     ${SUDO} apt-get install -y llvm-11-dev lld-11 clang-11
   else
-    ${SUDO} yum install -y llvm clang
+    if [[ "${OS_VERSION}" -eq "7" ]]; then
+      ${SUDO} yum install -y llvm-toolset-7.0-clang-devel
+      source /opt/rh/llvm-toolset-7.0/enable
+      export LIBCLANG_PATH=/opt/rh/llvm-toolset-7.0/root/usr/lib64/
+    else
+      ${SUDO} yum install -y llvm-devel clang-devel lld
+    fi
   fi
 }
 
@@ -265,6 +271,7 @@ write_env_config() {
     echo "export GRAPHSCOPE_HOME=${install_prefix}"
     echo "export PATH=${install_prefix}/bin:\$HOME/.cargo/bin:\$PATH"
     echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
+    echo "export LIBRARY_PATH=${install_prefix}/lib:${install_prefix}/lib64"
   } >>"${OUTPUT_ENV_FILE}"
 
   if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
@@ -292,7 +299,7 @@ write_env_config() {
   else
     {
       if [[ "${OS_VERSION}" -eq "7" ]]; then
-        echo "source /opt/rh/devtoolset-10/enable"
+        echo "source /opt/rh/devtoolset-8/enable"
         echo "source /opt/rh/rh-python38/enable"
       fi
       if [ -z "${JAVA_HOME}" ]; then
