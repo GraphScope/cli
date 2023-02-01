@@ -10,6 +10,10 @@ log() {
   echo -e "$(green "$*")" >&1
 }
 
+info() {
+  echo -e "$(green "$*")" >&1
+}
+
 succ() {
   echo -e "$(green_bold "[SUCCESS]: $*")" >&1
 }

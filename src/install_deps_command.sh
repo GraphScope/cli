@@ -4,18 +4,16 @@ type=${args[type]}
 cn=${args[--cn]}
 install_prefix=${args[--install-prefix]}
 deps_prefix=${args[--from-local]}
-
-only_grape_v6d=${args[--only-grape-v6d]}
-no_grape_v6d=${args[--no-grape-v6d]}
-
 v6d_version=${args[--v6d-version]}
-
 jobs=${args[--jobs]}
 
-if [[ $(id -u) -ne 0 ]]; then
-  warning "Not running as root."
-else
+for_analytical=${args[--for-analytical]}
+no_v6d=${args[--no-v6d]}
+
+SUDO=sudo
+if [[ $(id -u) -eq 0 ]]; then
   warning "Please note that I am running as root."
+  SUDO=""
 fi
 
 readonly OS=$(get_os_version)
@@ -23,8 +21,6 @@ readonly OS_PLATFORM=${OS%-*}
 readonly OS_VERSION=${OS#*-}
 
 readonly OUTPUT_ENV_FILE="${HOME}/.graphscope_env"
-
-BASIC_PACKAGES_TO_INSTALL=
 
 log "Installing ${type} dependencies for GraphScope on ${OS}..."
 
@@ -35,16 +31,6 @@ if [[ -n ${cn} ]]; then
   export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git"
   export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles"
   export GRAPHSCOPE_DOWNLOAD_FROM_CN="true"
-fi
-
-if [[ -n ${only_grape_v6d} ]]; then
-  log "Only install libgrape-lite and vineyard."
-  if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
-    install_grape_vineyard_macos
-  else
-    install_grape_vineyard_linux
-  fi
-  exit 0
 fi
 
 check_os_compatibility() {
@@ -66,141 +52,79 @@ check_os_compatibility() {
   log "Running on ${OS_PLATFORM} ${OS_VERSION}"
 }
 
-init_basic_packages() {
-  if [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
-    BASIC_PACKAGES_TO_INSTALL=(
-      curl
-      wget
-      git
-      cmake
-      build-essential
-      lsb-release
-      libopenmpi-dev
-      libgflags-dev
-      libgoogle-glog-dev
-      libboost-all-dev
-      libprotobuf-dev
-      libgrpc++-dev
-      protobuf-compiler-grpc
-      python3-pip
-      libunwind-dev
-      rapidjson-dev
-      libmsgpack-dev
-      librdkafka-dev
-      llvm-11-dev
-      lld-11
-      clang-11
-    )
-  elif [[ "${OS_PLATFORM}" == *"CentOS"* ]]; then
-    BASIC_PACKAGES_TO_INSTALL=(
-      epel-release
-      perl
-      which
-      sudo
-      curl
-      wget
-      git
-      libunwind-devel
-      librdkafka-devel
-    )
-    if [[ "${OS_VERSION}" -eq "8" ]]; then
-      ADDITIONAL_PACKAGES=(
-        gcc-c++
-        python38-devel
-        rapidjson-devel
-        msgpack-devel
-        openssl-devel
-        boost-devel
-        gflags-devel
-        glog-devel
-        llvm
-        lld
-        clang
-      )
-    elif [[ "${OS_VERSION}" -eq "7" ]]; then
-      BASIC_PACKAGES_TO_INSTALL+=(centos-release-scl-rh)
-      ADDITIONAL_PACKAGES=(
-        devtoolset-10-gcc-c++
-        rh-python38-python-pip
-        rh-python38-python-devel
-        rapidjson-devel
-        msgpack-devel
-        llvm
-        clang
-      )
-    fi
-  else # darwin
-    BASIC_PACKAGES_TO_INSTALL=(
-      boost
-      gflags
-      glog
-      open-mpi
-      openssl@1.1
-      protobuf
-      grpc
-      rapidjson
-      msgpack-cxx
-      librdkafka
-    )
-  fi
-  readonly BASIC_PACKAGES_TO_INSTALL
+BASIC_PACKAGES_LINUX=("file" "curl" "wget" "git" "sudo")
+
+BASIC_PACKAGES_UBUNTU=("${BASIC_PACKAGES_LINUX[@]}" "build-essential" "cmake" "libunwind-dev" "python3-pip")
+
+BASIC_PACKAGES_CENTOS_8=("${BASIC_PACKAGES_LINUX[@]}" "epel-release" "libunwind-devel" "perl" "which")
+BASIC_PACKAGES_CENTOS_7=("${BASIC_PACKAGES_CENTOS_8[@]}" "centos-release-scl-rh")
+ADDITIONAL_PACKAGES_CENTOS_8=("gcc-c++" "python38-devel")
+ADDITIONAL_PACKAGES_CENTOS_7=("make" "devtoolset-8-gcc-c++" "rh-python38-python-pip" "rh-python38-python-devel")
+
+ANALYTICAL_UBUNTU=(
+  "libboost-all-dev"
+  "libopenmpi-dev"
+  "libgflags-dev"
+  "libgoogle-glog-dev"
+  "libprotobuf-dev"
+  "libgrpc++-dev"
+  "libmsgpack-dev"
+  "librdkafka-dev"
+  "protobuf-compiler-grpc"
+  "rapidjson-dev"
+)
+
+ANALYTICAL_CENTOS_7=("librdkafka-devel" "msgpack-devel" "rapidjson-devel")
+ANALYTICAL_CENTOS_8=("${ANALYTICAL_CENTOS_7[@]}" "boost-devel" "gflags-devel" "glog-devel" "openssl-devel")
+
+ANALYTICAL_MACOS=(
+  "boost"
+  "gflags"
+  "glog"
+  "open-mpi"
+  "openssl@1.1"
+  "protobuf"
+  "grpc"
+  "rapidjson"
+  "msgpack-cxx"
+  "librdkafka"
+)
+
+_install_apache_arrow_ubuntu() {
+  log "Installing apache-arrow."
+  ${SUDO} apt-get install -y lsb-release
+  # shellcheck disable=SC2046,SC2019,SC2018
+  wget -c https://apache.jfrog.io/artifactory/arrow/"$(lsb_release --id --short | tr 'A-Z' 'a-z')"/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
+    -P /tmp/
+  ${SUDO} apt-get install -y -V /tmp/apache-arrow-apt-source-latest-"$(lsb_release --codename --short)".deb
+  ${SUDO} apt-get update -y
+  ${SUDO} apt-get install -y libarrow-dev
+  rm /tmp/apache-arrow-apt-source-latest-*.deb
 }
 
-install_grape_vineyard_linux() {
-  log "Installing python packages for vineyard codegen."
-  pip3 --no-cache-dir install pip -U --user
-  pip3 --no-cache-dir install libclang wheel --user
-  install_grape "${deps_prefix}" "${install_prefix}" "${jobs}"
-  install_vineyard "${deps_prefix}" "${install_prefix}" "${v6d_version}" "${jobs}"
-}
-
-install_grape_vineyard_macos() {
-  brew install libgrape-lite vineyard
-}
-
-install_cppkafka_universal() {
-  log "Building and installing cppkafka."
-
-  if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
-    homebrew_prefix=$(brew --prefix)
-    export LDFLAGS="-L${homebrew_prefix}/opt/openssl@1.1/lib"
-    export CPPFLAGS="-I${homebrew_prefix}/opt/openssl@1.1/include"
-    export PKG_CONFIG_PATH="${homebrew_prefix}/opt/openssl@1.1/lib/pkgconfig"
-  fi
-
-  install_cppkafka "${deps_prefix}" "${install_prefix}"
-}
-
-install_rust_universal() {
-  if ! command -v rustup &>/dev/null; then
-    log "Installing rust."
-    curl -sf -L https://static.rust-lang.org/rustup.sh | sh -s -- -y --profile minimal
-  fi
-}
-
-install_java_maven_ubuntu() {
+_install_java_maven_ubuntu() {
   if ! command -v javac &>/dev/null; then
     log "Installing default-jdk"
-    sudo apt-get install default-jdk -y
+    ${SUDO} apt-get install default-jdk -y
   fi
   if ! command -v mvn &>/dev/null; then
     log "Installing maven"
-    sudo apt-get install maven -y
+    ${SUDO} apt-get install maven -y
   fi
 }
 
-install_java_maven_centos() {
+_install_java_maven_centos() {
   if ! command -v javac &>/dev/null; then
     log "Installing java-1.8.0-openjdk-devel"
-    sudo yum install java-1.8.0-openjdk-devel -y
+    ${SUDO} yum install java-1.8.0-openjdk-devel -y
   fi
   if ! command -v mvn &>/dev/null; then
     log "Installing maven"
-    install_maven  "${deps_prefix}" "${install_prefix}"
+    install_maven "${deps_prefix}" "${install_prefix}"
   fi
 }
 
-install_java_maven_macos() {
+_install_java_maven_macos() {
   if ! command -v javac &>/dev/null; then
     log "Installing openjdk@11"
     # we need arm64-base jvm, install from brew.
@@ -212,127 +136,143 @@ install_java_maven_macos() {
   fi
 }
 
-install_apache_arrow_ubuntu() {
-  log "Installing apache-arrow."
-  # shellcheck disable=SC2046,SC2019,SC2018
-  wget -c https://apache.jfrog.io/artifactory/arrow/"$(lsb_release --id --short | tr 'A-Z' 'a-z')"/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb \
-    -P /tmp/
-  sudo apt-get install -y -V /tmp/apache-arrow-apt-source-latest-"$(lsb_release --codename --short)".deb
-  sudo apt-get update -y && sudo apt-get install -y libarrow-dev
-  rm /tmp/apache-arrow-apt-source-latest-*.deb
+_install_dependencies_analytical_ubuntu() {
+  DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC ${SUDO} apt-get install -y ${ANALYTICAL_UBUNTU[*]}
+  _install_apache_arrow_ubuntu
 }
 
-install_deps_ubuntu() {
-  log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
-  # shellcheck disable=SC2086
-  sudo apt-get update -y
-  DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC sudo apt-get install -y ${BASIC_PACKAGES_TO_INSTALL[*]}
-
-  install_apache_arrow_ubuntu
-  install_java_maven_ubuntu
-}
-
-install_deps_centos_pre() {
-    log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
-    # shellcheck disable=SC2086
-    sudo yum install -y ${BASIC_PACKAGES_TO_INSTALL[*]}
-    log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
-    # shellcheck disable=SC2086
-    sudo yum install -y ${ADDITIONAL_PACKAGES[*]}
-    install_cmake  "${deps_prefix}" "${install_prefix}"
-}
-
-install_deps_centos_after() {
+_install_dependencies_analytical_centos_common() {
   install_apache_arrow "${deps_prefix}" "${install_prefix}"
   install_open_mpi "${deps_prefix}" "${install_prefix}"
   install_protobuf "${deps_prefix}" "${install_prefix}"
   install_zlib "${deps_prefix}" "${install_prefix}"
   install_grpc "${deps_prefix}" "${install_prefix}"
-
-  install_java_maven_centos
 }
-install_deps_centos7() {
-  install_deps_centos_pre
 
-  source /opt/rh/devtoolset-10/enable
+_install_dependencies_analytical_centos8() {
+  ${SUDO} yum install -y ${ANALYTICAL_CENTOS_8[*]}
+  install_cmake "${deps_prefix}" "${install_prefix}"
+  _install_dependencies_analytical_centos_common
+}
+_install_dependencies_analytical_centos7() {
+  ${SUDO} yum install -y ${ANALYTICAL_CENTOS_7[*]}
+  source /opt/rh/devtoolset-8/enable
   source /opt/rh/rh-python38/enable
   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${install_prefix}/lib:${install_prefix}/lib64
 
+  install_cmake "${deps_prefix}" "${install_prefix}"
   install_gflags "${deps_prefix}" "${install_prefix}"
   install_glog "${deps_prefix}" "${install_prefix}"
   install_boost "${deps_prefix}" "${install_prefix}"
   install_openssl "${deps_prefix}" "${install_prefix}"
-
-  install_deps_centos_after
+  _install_dependencies_analytical_centos_common
 }
-
-install_deps_centos8() {
-  sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-  sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-  sudo yum install -y 'dnf-command(config-manager)'
-  sudo dnf install -y epel-release
-  sudo dnf config-manager --set-enabled epel
-  sudo dnf config-manager --set-enabled powertools
-
-  install_deps_centos_pre
-  install_deps_centos_after
-}
-
-install_deps_macos() {
-  log "Installing packages ${BASIC_PACKAGES_TO_INSTALL[*]}"
-  export HOMEBREW_NO_INSTALL_CLEANUP=1
-  export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
-  # shellcheck disable=SC2086
-  brew install ${BASIC_PACKAGES_TO_INSTALL[*]}
-
-  brew install llvm || true  # prevent the `brew link` failure
-
-  install_java_maven_macos
-
+_install_dependencies_analytical_macos() {
+  brew install ${ANALYTICAL_MACOS[*]}
   homebrew_prefix=$(brew --prefix)
-  export OPENSSL_ROOT_DIR=${homebrew_prefix}/opt/openssl
-  export OPENSSL_LIBRARIES=${homebrew_prefix}/opt/openssl/lib
-  export OPENSSL_SSL_LIBRARY=${homebrew_prefix}/opt/openssl/lib/libssl.dylib
-  export CC=${homebrew_prefix}/opt/llvm/bin/clang
-  export CXX=${homebrew_prefix}/opt/llvm/bin/clang++
-  export CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER=${CC}
-  export CPPFLAGS=-I${homebrew_prefix}/opt/llvm/include
+  export LDFLAGS="${LDFLAGS} -L${homebrew_prefix}/opt/openssl@1.1/lib"
+  export CPPFLAGS="${CPPFLAGS} -I${homebrew_prefix}/opt/openssl@1.1/include"
+  export PKG_CONFIG_PATH="${homebrew_prefix}/opt/openssl@1.1/lib/pkgconfig"
 }
 
-install_dependencies() {
-  # install dependencies for specific platforms.
-  if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
-    install_deps_macos
-    if [[ -z ${no_grape_v6d} ]]; then
-      install_grape_vineyard_macos
-    fi
-  else
-    if [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
-      install_deps_ubuntu
-    elif [[ "${OS_PLATFORM}" == *"CentOS"* ]]; then
-      if [[ "${OS_VERSION}" -eq "8" ]]; then
-        install_deps_centos8
-      elif [[ "${OS_VERSION}" -eq "7" ]]; then
-        install_deps_centos7
-      fi
-    fi
-    if [[ -z ${no_grape_v6d} ]]; then
-      install_grape_vineyard_linux
+install_basic_packages_universal() {
+  if [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
+    ${SUDO} apt-get update -y
+    DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC ${SUDO} apt-get install -y ${BASIC_PACKAGES_UBUNTU[*]}
+  elif [[ "${OS_PLATFORM}" == *"CentOS"* ]]; then
+    if [[ "${OS_VERSION}" -eq "7" ]]; then
+      ${SUDO} yum install -y ${BASIC_PACKAGES_CENTOS_7[*]}
+      ${SUDO} yum install -y ${ADDITIONAL_PACKAGES_CENTOS_7[*]}
+    else
+      sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+      sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+      ${SUDO} yum install -y 'dnf-command(config-manager)'
+      ${SUDO} dnf install -y epel-release
+      ${SUDO} dnf config-manager --set-enabled epel
+      ${SUDO} dnf config-manager --set-enabled powertools
+      ${SUDO} yum install -y ${BASIC_PACKAGES_CENTOS_8[*]}
+      ${SUDO} yum install -y ${ADDITIONAL_PACKAGES_CENTOS_8[*]}
     fi
   fi
+}
 
-  install_rust_universal
-  install_cppkafka_universal
+install_grape_vineyard_universal() {
+  if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
+    brew install libgrape-lite vineyard
+  else
+    log "Installing python packages for vineyard codegen."
+    pip3 --no-cache-dir install pip -U --user
+    pip3 --no-cache-dir install libclang wheel --user
+    install_grape "${deps_prefix}" "${install_prefix}" "${jobs}"
+    install_vineyard "${deps_prefix}" "${install_prefix}" "${v6d_version}" "${jobs}"
+  fi
+}
 
-  log "Output environments config file ${OUTPUT_ENV_FILE}"
-  write_env_config
+install_rust_universal() {
+  if ! command -v rustup &>/dev/null; then
+    log "Installing rust."
+    curl -sf -L https://static.rust-lang.org/rustup.sh | sh -s -- -y --profile minimal
+  fi
+}
+
+install_java_maven_universal() {
+  if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
+    _install_java_maven_macos
+  elif [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
+    _install_java_maven_ubuntu
+  else
+    _install_java_maven_centos
+  fi
+}
+
+install_llvm_universal() {
+  if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
+    brew install llvm || true # prevent the `brew link` failure
+    homebrew_prefix=$(brew --prefix)
+    export CC=${homebrew_prefix}/opt/llvm/bin/clang
+    export CXX=${homebrew_prefix}/opt/llvm/bin/clang++
+    export CPPFLAGS="${CPPFLAGS} -I${homebrew_prefix}/opt/llvm/include"
+    export CARGO_TARGET_X86_64_APPLE_DARWIN_LINKER=${CC}
+  elif [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
+    ${SUDO} apt-get install -y llvm-11-dev lld-11 clang-11
+  else
+    if [[ "${OS_VERSION}" -eq "7" ]]; then
+      ${SUDO} yum install -y llvm-toolset-7.0-clang-devel
+      source /opt/rh/llvm-toolset-7.0/enable
+      export LIBCLANG_PATH=/opt/rh/llvm-toolset-7.0/root/usr/lib64/
+    else
+      ${SUDO} yum install -y llvm-devel clang-devel lld
+    fi
+  fi
+}
+
+install_dependencies_analytical_universal() {
+  if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
+    _install_dependencies_analytical_macos
+  elif [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
+    _install_dependencies_analytical_ubuntu
+  else
+    if [[ "${OS_VERSION}" -eq "7" ]]; then
+      _install_dependencies_analytical_centos7
+    else
+      _install_dependencies_analytical_centos8
+    fi
+  fi
 }
 
 write_env_config() {
+  log "Output environments config file ${OUTPUT_ENV_FILE}"
   if [ -f "${OUTPUT_ENV_FILE}" ]; then
     warning "Found ${OUTPUT_ENV_FILE} exists, remove the environment config file and generate a new one."
     rm -f "${OUTPUT_ENV_FILE}"
   fi
+
+  {
+    echo "export GRAPHSCOPE_HOME=${install_prefix}"
+    echo "export PATH=${install_prefix}/bin:\$HOME/.cargo/bin:\$PATH"
+    echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
+    echo "export LIBRARY_PATH=${install_prefix}/lib:${install_prefix}/lib64"
+  } >>"${OUTPUT_ENV_FILE}"
 
   if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
     homebrew_prefix=$(brew --prefix)
@@ -343,7 +283,6 @@ write_env_config() {
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=\$(/usr/libexec/java_home -v11)"
       fi
-      echo "export PATH=${install_prefix}/bin:\$HOME/.cargo/bin:\${JAVA_HOME}/bin:\$PATH"
       echo "export OPENSSL_ROOT_DIR=${homebrew_prefix}/opt/openssl"
       echo "export OPENSSL_LIBRARIES=${homebrew_prefix}/opt/openssl/lib"
       echo "export OPENSSL_SSL_LIBRARY=${homebrew_prefix}/opt/openssl/lib/libssl.dylib"
@@ -353,23 +292,21 @@ write_env_config() {
 
   elif [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
     {
-      echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/default-java"
       fi
-      echo "export PATH=${install_prefix}/bin:\${JAVA_HOME}/bin:\$HOME/.cargo/bin:\$PATH"
     } >>"${OUTPUT_ENV_FILE}"
   else
     {
       if [[ "${OS_VERSION}" -eq "7" ]]; then
-        echo "source /opt/rh/devtoolset-10/enable"
+        echo "source /opt/rh/devtoolset-8/enable"
         echo "source /opt/rh/rh-python38/enable"
+        echo "source /opt/rh/llvm-toolset-7.0/enable || true"
+        echo "export LIBCLANG_PATH=/opt/rh/llvm-toolset-7.0/root/usr/lib64/"
       fi
-      echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/java"
       fi
-      echo "export PATH=${install_prefix}/bin:\${JAVA_HOME}/bin:\$HOME/.cargo/bin:\$PATH"
     } >>"${OUTPUT_ENV_FILE}"
   fi
 }
@@ -385,16 +322,34 @@ install_deps_for_dev() {
   # install_deps for development on local
   check_os_compatibility
 
-  init_basic_packages
-
   init_workspace_and_env
 
-  install_dependencies
+  if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
+    export HOMEBREW_NO_INSTALL_CLEANUP=1
+    export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+  fi
+
+  install_basic_packages_universal
+  if [[ -n ${for_analytical} ]]; then
+    install_dependencies_analytical_universal
+    if [[ -n ${no_v6d} ]]; then
+      install_grape_vineyard_universal
+    fi
+  else # for all
+    install_dependencies_analytical_universal
+    install_grape_vineyard_universal
+    install_java_maven_universal
+    install_llvm_universal
+    install_rust_universal
+    install_cppkafka "${deps_prefix}" "${install_prefix}"
+  fi
+
+  write_env_config
 
   succ "The script has installed all dependencies for building GraphScope, use commands:\n
   $ source ${OUTPUT_ENV_FILE}
-  $ make install\n
-  to build and develop GraphScope."
+  $ make install
+  \nto build and develop GraphScope."
 }
 
 install_deps_for_client() {
@@ -402,8 +357,8 @@ install_deps_for_client() {
   # TODO: refine
   pip3 --no-cache-dir install -U pip --user
   pip3 --no-cache-dir install auditwheel==5.0.0 daemons etcd-distro gremlinpython \
-          hdfs3 fsspec oss2 s3fs ipython kubernetes libclang networkx==2.4 numpy pandas parsec pycryptodome \
-          pyorc pytest scipy scikit_learn wheel --user
+    hdfs3 fsspec oss2 s3fs ipython kubernetes libclang networkx==2.4 numpy pandas parsec pycryptodome \
+    pyorc pytest scipy scikit_learn wheel --user
   pip3 --no-cache-dir install Cython --pre -U --user
 }
 

@@ -48,7 +48,7 @@ function cleanup_files {
     for file in "$@"
     do
         log "Cleaning up ${file}"
-        if [ -f "${file}" ]; then
+        if [[ -f "${file}" || -d "${file}" ]]; then
           rm -rf "${file}"
         fi
     done

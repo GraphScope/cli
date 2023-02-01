@@ -134,14 +134,11 @@ install_apache_arrow() {
     -DARROW_FILESYSTEM=ON \
     -DARROW_FLIGHT=OFF \
     -DARROW_GANDIVA=OFF \
-    -DARROW_GANDIVA_JAVA=OFF \
     -DARROW_HDFS=OFF \
-    -DARROW_HIVESERVER2=OFF \
     -DARROW_JSON=OFF \
     -DARROW_ORC=OFF \
     -DARROW_PARQUET=OFF \
     -DARROW_PLASMA=OFF \
-    -DARROW_PLASMA_JAVA_CLIENT=OFF \
     -DARROW_PYTHON=OFF \
     -DARROW_S3=OFF \
     -DARROW_WITH_BZ2=OFF \
@@ -370,7 +367,7 @@ install_maven() {
 
   directory="apache-maven-3.8.6"
   file="apache-maven-3.8.6-bin.tar.gz"
-  url="https://dlcdn.apache.org/maven/maven-3/3.8.6/binaries"
+  url="https://archive.apache.org/dist/maven/maven-3/3.8.6/binaries"
   url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
