@@ -332,7 +332,7 @@ install_deps_for_dev() {
   install_basic_packages_universal
   if [[ -n ${for_analytical} ]]; then
     install_dependencies_analytical_universal
-    if [[ -n ${no_v6d} ]]; then
+    if [[ -z ${no_v6d} ]]; then
       install_grape_vineyard_universal
     fi
   else # for all

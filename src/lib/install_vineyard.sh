@@ -44,14 +44,17 @@ install_vineyard() {
     return 0
   fi
 
-  directory="v6d"
-  file="${directory}-${v6d_version}.tar.gz"
-  log "Building and installing ${directory}."
+  log "Building and installing v6d."
   pushd "${workdir}" || exit
   if [[ "${v6d_version}" != "v"* ]]; then
+    directory="v6d"
+    file="${directory}-${v6d_version}.tar.gz"
     url="https://github.com/v6d-io/v6d.git"
     clone_if_not_exists ${directory} "${file}" "${url}" "${v6d_version}"
   else
+    # remove the prefix 'v'
+    directory="v6d-${v6d_version:1:100}"
+    file="${directory}.tar.gz"
     url="https://github.com/v6d-io/v6d/releases/download/${v6d_version}"
     cn_url=$(maybe_set_to_cn_url "${url}")
     status=$(curl --head --silent "${cn_url}"/"${file}" | head -n 1)
@@ -60,7 +63,6 @@ install_vineyard() {
     else
       download_tar_and_untar_if_not_exists ${directory} "${file}" "${cn_url}"
     fi
-
   fi
   pushd ${directory} || exit
 
