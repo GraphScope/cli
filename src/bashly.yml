@@ -68,6 +68,14 @@ commands:
   dependencies:
     docker: see https://docker.com for installation instructions
 
+- name: test
+  alias: t
+  help: Run tests of graphscope
+  flags:
+  - long: --analytical
+    short: -a
+    help: Run analytical tests
+
 - name: install-deps
   alias: i
   help: Install dependencies on local machine.
