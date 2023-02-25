@@ -68,6 +68,30 @@ commands:
   dependencies:
     docker: see https://docker.com for installation instructions
 
+- name: test
+  alias: t
+  help: Run tests of graphscope
+
+  args:
+  - name: type
+    help: test a subset of the codebase, organized by components.
+    allowed: [gae, gaejava, gie, gle, python, coordinator, groot, e2e]
+
+  flags:
+  - long: --local
+    help: Run local tests
+
+  - long: --k8s
+    help: Run k8s tests
+
+  - long: --nx
+    help: Run nx tests
+  
+  - long: --testdata
+    arg: directory
+    default: "/tmp/gstest"
+    help: assign a custom test data location. This could be cloned from https://github.com/graphscope/gstest
+
 - name: install-deps
   alias: i
   help: Install dependencies on local machine.
@@ -117,3 +141,10 @@ commands:
   - gs install-deps dev --cn -j 6
   - gs install-deps dev --from-local ~/Downloads/gs-all-deps
   - gs install-deps dev --install-prefix ~/gs
+
+- name: format
+  args:
+  - name: lang
+    help: format which part of languages
+    allowed: [cpp, java, python, rust]
+    required: true

@@ -10,7 +10,6 @@ fi
 
 #docker pull graphscope/graphscope-dev
 docker run \
-    --net=host \
     -it graphscope/graphscope-dev \
     /bin/bash
 

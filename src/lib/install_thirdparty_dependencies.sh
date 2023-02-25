@@ -269,7 +269,6 @@ install_protobuf() {
   ./configure --prefix="${install_prefix}" --enable-shared --disable-static
   make -j$(nproc)
   make install
-  ldconfig
   popd || exit
   popd || exit
   cleanup_files "${workdir}/${directory}" "${workdir}/${file}"
@@ -308,7 +307,7 @@ install_grpc() {
           -DgRPC_BUILD_GRPC_NODE_PLUGIN=OFF \
           -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=OFF \
           -DgRPC_BUILD_GRPC_PHP_PLUGIN=OFF \
-          -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF \
+          -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=ON \
           -DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF \
           -DgRPC_BACKWARDS_COMPATIBILITY_MODE=ON \
           -DgRPC_PROTOBUF_PROVIDER=package \

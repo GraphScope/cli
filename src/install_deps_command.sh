@@ -78,6 +78,7 @@ ANALYTICAL_CENTOS_7=("librdkafka-devel" "msgpack-devel" "rapidjson-devel")
 ANALYTICAL_CENTOS_8=("${ANALYTICAL_CENTOS_7[@]}" "boost-devel" "gflags-devel" "glog-devel" "openssl-devel")
 
 ANALYTICAL_MACOS=(
+  "apache-arrow"
   "boost"
   "gflags"
   "glog"
@@ -254,6 +255,7 @@ install_dependencies_analytical_universal() {
   else
     if [[ "${OS_VERSION}" -eq "7" ]]; then
       _install_dependencies_analytical_centos7
+      install_java_maven_universal
     else
       _install_dependencies_analytical_centos8
     fi
@@ -337,7 +339,9 @@ install_deps_for_dev() {
     fi
   else # for all
     install_dependencies_analytical_universal
-    install_grape_vineyard_universal
+    if [[ -z ${no_v6d} ]]; then
+      install_grape_vineyard_universal
+    fi
     install_java_maven_universal
     install_llvm_universal
     install_rust_universal
