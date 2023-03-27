@@ -17,9 +17,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Set up Ruby 3.1
-      uses: actions/setup-ruby@v1
+      uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.1.x
+        ruby-version: 3.1.3
 
     - name: Install bash.ly and build
       run: |
@@ -53,7 +53,7 @@ jobs:
         fi
         sudo mkdir /opt/graphscope
         sudo chown -R $(id -u):$(id -g) /opt/graphscope
-        bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.12.2
+        bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.13.4
         cat ~/.graphscope_env
 
     - name: Get GraphScope Source
@@ -95,7 +95,7 @@ jobs:
 
       - name: Install dev
         run: |
-          bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.12.2
+          bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.13.4
           cat ~/.graphscope_env
 
       - name: Get GraphScope Source
@@ -123,7 +123,7 @@ jobs:
 
       - name: Install dev
         run: |
-          bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.12.2
+          bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.13.4
           cat ~/.graphscope_env
 
       - name: Get GraphScope Source
