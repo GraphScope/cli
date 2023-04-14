@@ -54,7 +54,7 @@ check_os_compatibility() {
 
 BASIC_PACKAGES_LINUX=("file" "curl" "wget" "git" "sudo")
 
-BASIC_PACKAGES_UBUNTU=("${BASIC_PACKAGES_LINUX[@]}" "build-essential" "cmake" "libunwind-dev" "python3-pip")
+BASIC_PACKAGES_UBUNTU=("${BASIC_PACKAGES_LINUX[@]}" "build-essential" "cmake" "libunwind-dev" "python3-pip" "patchelf")
 
 BASIC_PACKAGES_CENTOS_8=("${BASIC_PACKAGES_LINUX[@]}" "epel-release" "libunwind-devel" "perl" "which")
 BASIC_PACKAGES_CENTOS_7=("${BASIC_PACKAGES_CENTOS_8[@]}" "centos-release-scl-rh")
@@ -199,12 +199,11 @@ install_basic_packages_universal() {
 
 install_grape_vineyard_universal() {
   if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
-    brew install libgrape-lite vineyard
+    brew install vineyard
   else
     log "Installing python packages for vineyard codegen."
     pip3 --no-cache-dir install pip -U --user
-    pip3 --no-cache-dir install libclang wheel --user
-    install_grape "${deps_prefix}" "${install_prefix}" "${jobs}"
+    pip3 --no-cache-dir install libclang wheel auditwheel --user
     install_vineyard "${deps_prefix}" "${install_prefix}" "${v6d_version}" "${jobs}"
   fi
 }
@@ -307,7 +306,7 @@ write_env_config() {
         echo "export LIBCLANG_PATH=/opt/rh/llvm-toolset-7.0/root/usr/lib64/"
       fi
       if [ -z "${JAVA_HOME}" ]; then
-        echo "export JAVA_HOME=/usr/lib/jvm/java"
+        echo "export JAVA_HOME=/usr/lib/jvm/jre-openjdk"
       fi
     } >>"${OUTPUT_ENV_FILE}"
   fi
@@ -360,7 +359,7 @@ install_deps_for_client() {
   # install python..
   # TODO: refine
   pip3 --no-cache-dir install -U pip --user
-  pip3 --no-cache-dir install auditwheel==5.0.0 daemons etcd-distro gremlinpython \
+  pip3 --no-cache-dir install auditwheel daemons etcd-distro gremlinpython \
     hdfs3 fsspec oss2 s3fs ipython kubernetes libclang networkx==2.4 numpy pandas parsec pycryptodome \
     pyorc pytest scipy scikit_learn wheel --user
   pip3 --no-cache-dir install Cython --pre -U --user
