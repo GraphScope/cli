@@ -323,6 +323,32 @@ install_grpc() {
   cleanup_files "${workdir}/${directory}" "${workdir}/${file}"
 }
 
+install_patchelf() {
+  workdir=$1
+  install_prefix=$2
+
+  if [[ -f "${install_prefix}/bin/patchelf" ]]; then
+    log "patchelf already installed, skip."
+    return 0
+  fi
+
+  ARCH=$(uname -m)
+
+  directory="patchelf"  # patchelf doesn't have a folder
+  file="patchelf-0.14.5-${ARCH}.tar.gz"
+  url="https://github.com/NixOS/patchelf/releases/download/0.14.5"
+  url=$(maybe_set_to_cn_url ${url})
+  log "Building and installing ${directory}."
+  pushd "${workdir}" || exit
+  mkdir -p "{directory}"
+  pushd "${directory}" || exit
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
+  mv bin/patchelf ${install_prefix}/bin/patchelf
+  popd || exit
+  popd || exit
+  cleanup_files "${workdir}/${directory}" "${workdir}/${file}"
+}
+
 install_cppkafka() {
   workdir=$1
   install_prefix=$2

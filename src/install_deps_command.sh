@@ -54,7 +54,7 @@ check_os_compatibility() {
 
 BASIC_PACKAGES_LINUX=("file" "curl" "wget" "git" "sudo")
 
-BASIC_PACKAGES_UBUNTU=("${BASIC_PACKAGES_LINUX[@]}" "build-essential" "cmake" "libunwind-dev" "python3-pip" "patchelf")
+BASIC_PACKAGES_UBUNTU=("${BASIC_PACKAGES_LINUX[@]}" "build-essential" "cmake" "libunwind-dev" "python3-pip")
 
 BASIC_PACKAGES_CENTOS_8=("${BASIC_PACKAGES_LINUX[@]}" "epel-release" "libunwind-devel" "perl" "which")
 BASIC_PACKAGES_CENTOS_7=("${BASIC_PACKAGES_CENTOS_8[@]}" "centos-release-scl-rh")
@@ -89,6 +89,7 @@ ANALYTICAL_MACOS=(
   "rapidjson"
   "msgpack-cxx"
   "librdkafka"
+  "patchelf"
 )
 
 _install_apache_arrow_ubuntu() {
@@ -250,8 +251,10 @@ install_dependencies_analytical_universal() {
   if [[ "${OS_PLATFORM}" == *"Darwin"* ]]; then
     _install_dependencies_analytical_macos
   elif [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
+    install_patchelf "${deps_prefix}" "${install_prefix}"
     _install_dependencies_analytical_ubuntu
   else
+    install_patchelf "${deps_prefix}" "${install_prefix}"
     if [[ "${OS_VERSION}" -eq "7" ]]; then
       _install_dependencies_analytical_centos7
       install_java_maven_universal

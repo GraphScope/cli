@@ -46,7 +46,7 @@ install_vineyard() {
   strip "${V6D_PREFIX}"/bin/vineyard* "${V6D_PREFIX}"/lib/libvineyard*
   python3 setup.py bdist_wheel
   # This is output fixed wheels to wheelhouse/
-  auditwheel repair dist/*
+  python3 -m auditwheel repair dist/*
   rm -rf dist/*
   python3 setup_bdist.py bdist_wheel
   python3 setup_io.py bdist_wheel
