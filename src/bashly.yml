@@ -16,37 +16,56 @@ environment_variables:
 
 commands:
 
-- name: build
-  alias: b
+- name: make
   help: Build GraphScope on local.
 
   args:
   - name: component
     help: component to build.
-    allowed: [all, analytical, interactive, learning, client, coordinator]
+    allowed: [all, install, analytical, analytical-java, interactive, learning, analytical-install, analytical-java-install, interactive-install, learning-install, client, coordinator, clean]
     required: false
+    default: all
+  
+  flags:
+  - long: --install-prefix
+    arg: prefix
+    help: Install dependency files to [prefix]. By default, './gs make install' will install all the files in '/opt/graphscope/bin', '/opt/graphscope/lib' etc. You can specify an installation prefix other than '/opt/graphscope' using '--install-prefix', for instance '--install-prefix=\$HOME'.
+    default: /opt/graphscope
 
+  examples:
+  - gs make analytical
+  - gs make interactive -DskipTests
+  - gs make install 
 
-- name: build-image
-  alias: bi
+- name: make-image
+  alias: mi
   help: Build GraphScope docker images.
 
   args:
   - name: image
     help: Images to build.
     # Whitelist + required
-    allowed: [all, graphscope-dev-base, graphscope-dev, coordinator, analytical, analytical-java, interactive, interactive-frontend, interactive-executor, learning, vineyard-dev, vineyard-runtime]
+    allowed: [all, graphscope-dev, coordinator, analytical, analytical-java, interactive, interactive-frontend, interactive-executor, learning, vineyard-dev, vineyard-runtime]
     required: true
   
   flags:
+  - long: --registry
+    arg: registry
+    help: registry name
+    default: docker.io
+  
+  - long: --tag
+    arg: tag
+    help: image tag name to build
+    default: latest
+  
   - long: --cn
     arg: cn
-    help: Whether to use CN located mirrors to speed up download.
+    help: Whether to use CN located mirrors to speed up download. [Not implemented]
 
   examples:
-  - gs build-image graphscope-dev
-  - gs build-image graphscope-dev --cn
-  - gs build-image analytical
+  - gs make-image graphscope-dev
+  - gs make-image analytical --registry registry.cn-hongkong.aliyuncs.com
 
   dependencies:
   - docker
@@ -75,7 +94,7 @@ commands:
   args:
   - name: type
     help: test a subset of the codebase, organized by components.
-    allowed: [gae, gaejava, gie, gle, python, coordinator, groot, e2e]
+    allowed: [analytical, analytical-java, interactive, learning, local-e2e, k8s-e2e, groot]
 
   flags:
   - long: --local

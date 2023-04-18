@@ -9,7 +9,12 @@ on_k8s=${args[--k8s]}
 nx=${args[--nx]}
 export GS_TEST_DIR=${testdata}
 
+# analytical, analytical-java, interactive, learning, local-e2e, k8s-e2e, groot
+
+type=${args[type]}
+
 GS_SOURCE_DIR="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
+
 
 function get_test_data {
   if [[ ! -d ${GS_TEST_DIR} ]]; then
@@ -18,12 +23,12 @@ function get_test_data {
   fi
 }
 
-function test_for_gae {
+function test_analytical {
   get_test_data
   "${GS_SOURCE_DIR}"/analytical_engine/test/app_tests.sh --test_dir "${GS_TEST_DIR}"
 }
 
-function test_for_gaejava {
+function test_analytical-java {
   get_test_data
 
   pushd "${GS_SOURCE_DIR}"/analytical_engine/java || exit
@@ -39,7 +44,7 @@ function test_for_gaejava {
   "${GS_SOURCE_DIR}"/analytical_engine/test/app_tests.sh --test_dir "${GS_TEST_DIR}"
 }
 
-function test_for_gie {
+function test_interactive {
   get_test_data
   if [[ -n ${on_local} ]]; then
     # IR unit test
@@ -60,50 +65,24 @@ function test_for_gie {
     ./function_test.sh 8112 2
   fi
 }
-function test_for_gle {
+function test_learning {
   get_test_data
-
+  err "Not implemented"
+  exit 1
 }
 
-function test_for_python {
+function test_local-e2e {
   get_test_data
   cd "${GS_SOURCE_DIR}"/python || exit
 
   # unittest
-  python3 -m pytest -s -v --exitfirst graphscope/tests/unittest
-
-  if [[ -n ${nx} ]]; then
-    # networkx
-    # basic test
-    python3 -m pytest --exitfirst -s -v graphscope/nx/tests \
-      --ignore=graphscope/nx/tests/convert
-    # convert test
-    python3 -m pytest --exitfirst -s -v graphscope/nx/tests/convert
-
-    # builtin algorithm test
-    python3 -m pytest --exitfirst -s -v graphscope/nx/algorithms/tests/builtin
-
-    # generator test
-    python3 -m pytest --exitfirst -s -v graphscope/nx/generators/tests
-
-    # read write test
-    python3 -m pytest --exitfirst -s -v -m "not slow" graphscope/nx/readwrite/tests
-
-    # forward algorithms test
-    python3 -m pytest --exitfirst -s -v -m "not slow" graphscope/nx/algorithms/tests/forward
-  fi
-  # java
-  version=$(cat "${GS_SOURCE_DIR}"/VERSION)
-  export USER_JAR_PATH="${GS_SOURCE_DIR}"/analytical_engine/java/grape-demo/target/grape-demo-${version}-shaded.jar
-
-  cd "${GS_SOURCE_DIR}"/python || exit
-  python3 -m pytest --exitfirst -s -v graphscope/tests/unittest/test_java_app.py
+  python3 -m pytest -s -vvv --exitfirst graphscope/tests/minitest/test_min.py
 }
 
-function test_for_coordinator {
+function test_k8s-e2e {
   get_test_data
   cd "${GS_SOURCE_DIR}"/python || exit
-
+  python3 -m pytest -s -vvv --exitfirst ./graphscope/tests/kubernetes/test_demo_script.py
 }
 
 function test_for_groot {
@@ -112,15 +91,4 @@ function test_for_groot {
   python3 -m pytest --exitfirst -s -vvv ./graphscope/tests/kubernetes/test_store_service.py
 }
 
-function test_for_e2e {
-  get_test_data
-  cd "${GS_SOURCE_DIR}"/python || exit
-  if [[ -n ${nx} ]]; then
-      # minitest
-      python3 -m pytest -s -v graphscope/tests/minitest
-  else
-      python3 -m pytest --exitfirst -s -vvv ./graphscope/tests/kubernetes/test_demo_script.py
-  fi
-}
-
-test_for_"${type}"
+test_"${type}"

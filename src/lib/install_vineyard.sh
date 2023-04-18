@@ -1,37 +1,3 @@
-install_grape() {
-  workdir=$1
-  install_prefix=$2
-  jobs=${3:-4} # $3:default=4
-
-  if [[ -f "${install_prefix}/include/grape/grape.h" ]]; then
-    log "libgrape-lite already installed, skip."
-    return 0
-  fi
-  directory="libgrape-lite"
-  branch="master"
-  file="${directory}-${branch}.tar.gz"
-  url="https://github.com/alibaba/libgrape-lite.git"
-  url=$(maybe_set_to_cn_url ${url})
-  log "Building and installing ${directory}."
-  pushd "${workdir}" || exit
-  if [[ ${url} == *.git ]]; then
-    clone_if_not_exists ${directory} ${file} "${url}" ${branch}
-  else
-    download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
-  fi
-  pushd ${directory} || exit
-
-  cmake . -DCMAKE_INSTALL_PREFIX="${install_prefix}" \
-          -DCMAKE_PREFIX_PATH="${install_prefix}"
-  make -j${jobs}
-  make install
-  strip "${install_prefix}/bin/run_app"
-  popd || exit
-  popd || exit
-  cleanup_files "${workdir}/${directory}" "${workdir}/${file}"
-}
-
-
 install_vineyard() {
   workdir=$1
   install_prefix=$2
@@ -44,6 +10,9 @@ install_vineyard() {
     return 0
   fi
 
+  auditwheel_path=$(python3 -c "import auditwheel; print(auditwheel.__path__[0] + '/main_repair.py')")
+  sed -i 's/p.error/logger.warning/g' ${auditwheel_path}
+  
   log "Building and installing v6d."
   pushd "${workdir}" || exit
   if [[ "${v6d_version}" != "v"* ]]; then
@@ -70,14 +39,19 @@ install_vineyard() {
         -DCMAKE_INSTALL_PREFIX="${V6D_PREFIX}" \
         -DBUILD_VINEYARD_TESTS=OFF \
         -DBUILD_SHARED_LIBS=ON \
-        -DBUILD_VINEYARD_PYTHON_BINDINGS=ON
+        -DBUILD_VINEYARD_PYTHON_BINDINGS=ON  \
+        -DBUILD_VINEYARD_GRAPH_WITH_GAR=OFF
   make -j"${jobs}"
   make install
   strip "${V6D_PREFIX}"/bin/vineyard* "${V6D_PREFIX}"/lib/libvineyard*
   python3 setup.py bdist_wheel
+  # This is output fixed wheels to wheelhouse/
+  python3 -m auditwheel repair dist/*
+  rm -rf dist/*
   python3 setup_bdist.py bdist_wheel
   python3 setup_io.py bdist_wheel
-  pip3 install --no-cache dist/* --user
+  mv dist/*.whl wheelhouse/
+  pip3 install --no-cache wheelhouse/* --user
   cp -rs "${V6D_PREFIX}"/* "${install_prefix}"/
   popd || exit
   popd || exit

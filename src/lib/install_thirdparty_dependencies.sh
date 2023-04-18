@@ -307,7 +307,7 @@ install_grpc() {
           -DgRPC_BUILD_GRPC_NODE_PLUGIN=OFF \
           -DgRPC_BUILD_GRPC_OBJECTIVE_C_PLUGIN=OFF \
           -DgRPC_BUILD_GRPC_PHP_PLUGIN=OFF \
-          -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=ON \
+          -DgRPC_BUILD_GRPC_PYTHON_PLUGIN=OFF \
           -DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF \
           -DgRPC_BACKWARDS_COMPATIBILITY_MODE=ON \
           -DgRPC_PROTOBUF_PROVIDER=package \
@@ -318,6 +318,33 @@ install_grpc() {
           -DPNG_ARM_NEON_OPT=0
   make -j$(nproc)
   make install
+  popd || exit
+  popd || exit
+  cleanup_files "${workdir}/${directory}" "${workdir}/${file}"
+}
+
+install_patchelf() {
+  workdir=$1
+  install_prefix=$2
+
+  if [[ -f "${install_prefix}/bin/patchelf" ]]; then
+    log "patchelf already installed, skip."
+    return 0
+  fi
+
+  ARCH=$(uname -m)
+
+  directory="patchelf"  # patchelf doesn't have a folder
+  file="patchelf-0.14.5-${ARCH}.tar.gz"
+  url="https://github.com/NixOS/patchelf/releases/download/0.14.5"
+  url=$(maybe_set_to_cn_url ${url})
+  log "Building and installing ${directory}."
+  pushd "${workdir}" || exit
+  mkdir -p "${directory}"
+  pushd "${directory}" || exit
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
+  mkdir -p ${install_prefix}/bin
+  mv bin/patchelf ${install_prefix}/bin/patchelf
   popd || exit
   popd || exit
   cleanup_files "${workdir}/${directory}" "${workdir}/${file}"
