@@ -343,6 +343,7 @@ install_patchelf() {
   mkdir -p "${directory}"
   pushd "${directory}" || exit
   download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
+  mkdir -p ${install_prefix}/bin
   mv bin/patchelf ${install_prefix}/bin/patchelf
   popd || exit
   popd || exit
