@@ -340,7 +340,7 @@ install_patchelf() {
   url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
   pushd "${workdir}" || exit
-  mkdir -p "{directory}"
+  mkdir -p "${directory}"
   pushd "${directory}" || exit
   download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   mv bin/patchelf ${install_prefix}/bin/patchelf
