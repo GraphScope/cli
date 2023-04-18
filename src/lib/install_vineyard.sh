@@ -39,13 +39,14 @@ install_vineyard() {
         -DCMAKE_INSTALL_PREFIX="${V6D_PREFIX}" \
         -DBUILD_VINEYARD_TESTS=OFF \
         -DBUILD_SHARED_LIBS=ON \
-        -DBUILD_VINEYARD_PYTHON_BINDINGS=ON
+        -DBUILD_VINEYARD_PYTHON_BINDINGS=ON  \
+        -DBUILD_VINEYARD_GRAPH_WITH_GAR=ON
   make -j"${jobs}"
   make install
   strip "${V6D_PREFIX}"/bin/vineyard* "${V6D_PREFIX}"/lib/libvineyard*
   python3 setup.py bdist_wheel
   # This is output fixed wheels to wheelhouse/
-  auditwheel repair dist/
+  auditwheel repair dist/*
   rm -rf dist/*
   python3 setup_bdist.py bdist_wheel
   python3 setup_io.py bdist_wheel

@@ -16,6 +16,7 @@ if [ "${GRAPHSCOPE_ENV:-dev}" == "dev" ]; then
     export GRAPHSCOPE_HOME="${bash_source_dir}"
 elif [ "${GRAPHSCOPE_ENV:-dev}" == "prod" ]; then
     log "Setting the environment for production"
+    export GRAPHSCOPE_HOME=${GRAPHSCOPE_HOME}
 else
     err "Invalid GRAPHSCOPE_ENV. (should be dev or prod)"
     exit 1
