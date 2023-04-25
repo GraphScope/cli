@@ -273,6 +273,7 @@ write_env_config() {
 
   {
     echo "export GRAPHSCOPE_HOME=${install_prefix}"
+    echo "export CMAKE_PREFIX_PATH=/opt/vineyard"
     echo "export PATH=${install_prefix}/bin:\$HOME/.cargo/bin:\$PATH"
     echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}"
     echo "export LIBRARY_PATH=${install_prefix}/lib:${install_prefix}/lib64"
