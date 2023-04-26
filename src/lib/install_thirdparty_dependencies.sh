@@ -204,7 +204,7 @@ install_openssl() {
   fi
 
   directory="openssl-OpenSSL_1_1_1k"
-  file="OpenSSL_1_1_1b.tar.gz"
+  file="OpenSSL_1_1_1k.tar.gz"
   url="https://github.com/openssl/openssl/archive"
   url=$(maybe_set_to_cn_url ${url})
   log "Building and installing ${directory}."
