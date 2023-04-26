@@ -75,7 +75,7 @@ ANALYTICAL_UBUNTU=(
 )
 
 ANALYTICAL_CENTOS_7=("librdkafka-devel" "msgpack-devel" "rapidjson-devel")
-ANALYTICAL_CENTOS_8=("${ANALYTICAL_CENTOS_7[@]}" "boost-devel" "gflags-devel" "glog-devel" "openssl-devel")
+ANALYTICAL_CENTOS_8=("${ANALYTICAL_CENTOS_7[@]}" "boost-devel" "gflags-devel" "glog-devel")
 
 ANALYTICAL_MACOS=(
   "apache-arrow"
@@ -149,6 +149,7 @@ _install_dependencies_analytical_centos_common() {
   install_protobuf "${deps_prefix}" "${install_prefix}"
   install_zlib "${deps_prefix}" "${install_prefix}"
   install_grpc "${deps_prefix}" "${install_prefix}"
+  install_openssl "${deps_prefix}" "${install_prefix}"
 }
 
 _install_dependencies_analytical_centos8() {
@@ -166,7 +167,6 @@ _install_dependencies_analytical_centos7() {
   install_gflags "${deps_prefix}" "${install_prefix}"
   install_glog "${deps_prefix}" "${install_prefix}"
   install_boost "${deps_prefix}" "${install_prefix}"
-  install_openssl "${deps_prefix}" "${install_prefix}"
   _install_dependencies_analytical_centos_common
 }
 _install_dependencies_analytical_macos() {
@@ -312,6 +312,7 @@ write_env_config() {
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/jre-openjdk"
       fi
+      echo "export OPENSSL_ROOT_DIR=${install_prefix}"
     } >>"${OUTPUT_ENV_FILE}"
   fi
 }
