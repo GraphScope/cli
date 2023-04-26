@@ -156,6 +156,7 @@ _install_dependencies_analytical_centos_common() {
 
 _install_dependencies_analytical_centos8() {
   ${SUDO} yum install -y ${ANALYTICAL_CENTOS_8[*]}
+  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${install_prefix}/lib:${install_prefix}/lib64
   install_cmake "${deps_prefix}" "${install_prefix}"
   _install_dependencies_analytical_centos_common
 }
