@@ -220,6 +220,32 @@ install_openssl() {
   cleanup_files "${workdir}/${directory}" "${workdir}/${file}"
 }
 
+install_openssl_static() {
+  workdir=$1
+  install_prefix=$2
+
+  if [[ -f "${install_prefix}/include/openssl/ssl.h" ]]; then
+    log "openssl already installed, skip."
+    return 0
+  fi
+
+  directory="openssl-OpenSSL_1_1_1k"
+  file="OpenSSL_1_1_1k.tar.gz"
+  url="https://github.com/openssl/openssl/archive"
+  url=$(maybe_set_to_cn_url ${url})
+  log "Building and installing ${directory}."
+  pushd "${workdir}" || exit
+  download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
+  pushd ${directory} || exit
+
+  ./config --prefix="${install_prefix}" -fPIC -static
+  make -j$(nproc)
+  make install
+  popd || exit
+  popd || exit
+  cleanup_files "${workdir}/${directory}" "${workdir}/${file}"
+}
+
 install_zlib() {
   workdir=$1
   install_prefix=$2

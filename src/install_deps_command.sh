@@ -146,7 +146,6 @@ _install_dependencies_analytical_ubuntu() {
 _install_dependencies_analytical_centos_common() {
   # the openssl must put before grpc, otherwise the grpc
   # cannot find the openssl.
-  install_openssl "${deps_prefix}" "${install_prefix}"
   install_apache_arrow "${deps_prefix}" "${install_prefix}"
   install_open_mpi "${deps_prefix}" "${install_prefix}"
   install_protobuf "${deps_prefix}" "${install_prefix}"
@@ -158,6 +157,7 @@ _install_dependencies_analytical_centos8() {
   ${SUDO} yum install -y ${ANALYTICAL_CENTOS_8[*]}
   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/lib/:/lib64${install_prefix}/lib:${install_prefix}/lib64
   install_cmake "${deps_prefix}" "${install_prefix}"
+  install_openssl_static "${deps_prefix}" "${install_prefix}"
   _install_dependencies_analytical_centos_common
 }
 _install_dependencies_analytical_centos7() {
@@ -170,6 +170,7 @@ _install_dependencies_analytical_centos7() {
   install_gflags "${deps_prefix}" "${install_prefix}"
   install_glog "${deps_prefix}" "${install_prefix}"
   install_boost "${deps_prefix}" "${install_prefix}"
+  install_openssl "${deps_prefix}" "${install_prefix}"
   _install_dependencies_analytical_centos_common
 }
 _install_dependencies_analytical_macos() {
