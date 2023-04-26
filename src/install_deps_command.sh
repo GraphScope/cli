@@ -144,6 +144,8 @@ _install_dependencies_analytical_ubuntu() {
 }
 
 _install_dependencies_analytical_centos_common() {
+  # the openssl must put before apache-arrow, otherwise the apache-arrow
+  # cannot find the openssl.
   install_openssl "${deps_prefix}" "${install_prefix}"
   install_apache_arrow "${deps_prefix}" "${install_prefix}"
   install_open_mpi "${deps_prefix}" "${install_prefix}"
