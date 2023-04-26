@@ -144,13 +144,13 @@ _install_dependencies_analytical_ubuntu() {
 }
 
 _install_dependencies_analytical_centos_common() {
+  # the openssl must put before grpc, otherwise the grpc
+  # cannot find the openssl.
+  install_openssl "${deps_prefix}" "${install_prefix}"
   install_apache_arrow "${deps_prefix}" "${install_prefix}"
   install_open_mpi "${deps_prefix}" "${install_prefix}"
   install_protobuf "${deps_prefix}" "${install_prefix}"
   install_zlib "${deps_prefix}" "${install_prefix}"
-  # the openssl must put before grpc, otherwise the grpc
-  # cannot find the openssl.
-  install_openssl "${deps_prefix}" "${install_prefix}"
   install_grpc "${deps_prefix}" "${install_prefix}"
 }
 
