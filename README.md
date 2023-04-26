@@ -43,6 +43,14 @@ yum install rh-ruby30-ruby -y
 gem install bashly
 ```
 
+#### Centos 8
+```bash
+sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+yum install @ruby:3.0 -y
+gem install bashly
+```
+
 ### Generate script
 ```bash
 # git clone https://github.com/GraphScope/cli.git & cd cli
