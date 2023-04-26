@@ -238,7 +238,7 @@ install_openssl_static() {
   download_tar_and_untar_if_not_exists ${directory} ${file} "${url}"
   pushd ${directory} || exit
 
-  ./config --prefix="${install_prefix}" -fPIC -static
+  ./config --prefix="${install_prefix}" no-shared -fPIC
   make -j$(nproc)
   make install
   popd || exit
