@@ -75,7 +75,7 @@ ANALYTICAL_UBUNTU=(
 )
 
 ANALYTICAL_CENTOS_7=("librdkafka-devel" "msgpack-devel" "rapidjson-devel")
-ANALYTICAL_CENTOS_8=("${ANALYTICAL_CENTOS_7[@]}" "boost-devel" "gflags-devel" "glog-devel" "openssl-devel")
+ANALYTICAL_CENTOS_8=("${ANALYTICAL_CENTOS_7[@]}" "boost-devel" "gflags-devel" "glog-devel")
 
 ANALYTICAL_MACOS=(
   "apache-arrow"
@@ -144,6 +144,8 @@ _install_dependencies_analytical_ubuntu() {
 }
 
 _install_dependencies_analytical_centos_common() {
+  # the openssl must put before grpc, otherwise the grpc
+  # cannot find the openssl.
   install_apache_arrow "${deps_prefix}" "${install_prefix}"
   install_open_mpi "${deps_prefix}" "${install_prefix}"
   install_protobuf "${deps_prefix}" "${install_prefix}"
@@ -153,7 +155,9 @@ _install_dependencies_analytical_centos_common() {
 
 _install_dependencies_analytical_centos8() {
   ${SUDO} yum install -y ${ANALYTICAL_CENTOS_8[*]}
+  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/lib/:/lib64${install_prefix}/lib:${install_prefix}/lib64
   install_cmake "${deps_prefix}" "${install_prefix}"
+  install_openssl_static "${deps_prefix}" "${install_prefix}"
   _install_dependencies_analytical_centos_common
 }
 _install_dependencies_analytical_centos7() {
@@ -312,6 +316,7 @@ write_env_config() {
       if [ -z "${JAVA_HOME}" ]; then
         echo "export JAVA_HOME=/usr/lib/jvm/jre-openjdk"
       fi
+      echo "export OPENSSL_ROOT_DIR=${install_prefix}"
     } >>"${OUTPUT_ENV_FILE}"
   fi
 }

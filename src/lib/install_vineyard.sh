@@ -12,7 +12,7 @@ install_vineyard() {
 
   auditwheel_path=$(python3 -c "import auditwheel; print(auditwheel.__path__[0] + '/main_repair.py')")
   sed -i 's/p.error/logger.warning/g' ${auditwheel_path}
-  
+
   log "Building and installing v6d."
   pushd "${workdir}" || exit
   if [[ "${v6d_version}" != "v"* ]]; then
@@ -40,7 +40,7 @@ install_vineyard() {
         -DBUILD_VINEYARD_TESTS=OFF \
         -DBUILD_SHARED_LIBS=ON \
         -DBUILD_VINEYARD_PYTHON_BINDINGS=ON  \
-        -DBUILD_VINEYARD_GRAPH_WITH_GAR=OFF
+        -DBUILD_VINEYARD_GRAPH_WITH_GAR=ON
   make -j"${jobs}"
   make install
   strip "${V6D_PREFIX}"/bin/vineyard* "${V6D_PREFIX}"/lib/libvineyard*
