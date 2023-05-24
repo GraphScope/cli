@@ -31,6 +31,8 @@ commands:
     arg: prefix
     help: Install dependency files to [prefix]. By default, './gs make install' will install all the files in '/opt/graphscope/bin', '/opt/graphscope/lib' etc. You can specify an installation prefix other than '/opt/graphscope' using '--install-prefix', for instance '--install-prefix=\$HOME'.
     default: /opt/graphscope
+  - long: --experimental
+    help: make install experimental components
 
   examples:
   - gs make analytical

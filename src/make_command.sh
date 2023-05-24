@@ -8,6 +8,9 @@ component=${args[component]}
 log "Making component ${component}"
 
 install_prefix=${args[--install-prefix]}
+experimental_flag=${args[--experimental]}
+
+GS_SOURCE_DIR="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
 
 export INSTALL_PREFIX=${install_prefix}
 
@@ -24,7 +27,11 @@ make_analytical() {
 }
 
 make_interactive() {
-    make interactive
+    if [[ -n ${experimental_flag} ]]; then
+        cd "${GS_SOURCE_DIR}"/interactive_engine/compiler && make build QUIET_OPT=""
+    else
+        make interactive
+    fi
 }
 
 make_learning() {
