@@ -17,6 +17,11 @@ Get the latest build of the script from artifacts in [Actions](https://github.co
 
 ## Develop
 
+1. Install ruby, gem and bashly
+2. Make changes to `src/bashly.yml`, and shell scripts within `src`. Refer to the documentation of [bash.ly](https://github.com/DannyBen/bashly)
+3. Run `bashly generate` in the root directory, a `gs` file would be generated
+4. Copy generated `gs` to `GraphScope` repo and commit.
+
 ### Install ruby >= 2.7
 
 #### MacOS
