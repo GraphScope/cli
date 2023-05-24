@@ -44,14 +44,7 @@ install_vineyard() {
   make -j"${jobs}"
   make install
   strip "${V6D_PREFIX}"/bin/vineyard* "${V6D_PREFIX}"/lib/libvineyard*
-  python3 setup.py bdist_wheel
-  # This is output fixed wheels to wheelhouse/
-  python3 -m auditwheel repair dist/*
-  rm -rf dist/*
-  python3 setup_bdist.py bdist_wheel
-  python3 setup_io.py bdist_wheel
-  mv dist/*.whl wheelhouse/
-  pip3 install --no-cache wheelhouse/* --user
+  pip3 install --no-cache -i https://pypi.org/simple "vineyard==${v6d_version}"
   cp -rs "${V6D_PREFIX}"/* "${install_prefix}"/
   popd || exit
   popd || exit
