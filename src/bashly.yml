@@ -54,20 +54,17 @@ commands:
   - long: --registry
     arg: registry
     help: registry name
-    default: docker.io
+    default: registry.cn-hongkong.aliyuncs.com
   
   - long: --tag
     arg: tag
     help: image tag name to build
     default: latest
   
-  - long: --cn
-    arg: cn
-    help: Whether to use CN located mirrors to speed up download. [Not implemented]
-
   examples:
   - gs make-image graphscope-dev
   - gs make-image analytical --registry registry.cn-hongkong.aliyuncs.com
+  - gs make-image analytical --registry docker.io
 
   dependencies:
   - docker
@@ -83,8 +80,8 @@ commands:
     help: Local path to the source code of GraphScope.
 
   examples:
-  - gs dev
-  - gs dev --local /home/bar/graphscope
+  - gs dev  # open an dev container
+  - gs dev --local ~/graphscope  # open an dev container and mount ~/graphscope to /workspaces/graphscope
 
   dependencies:
   - docker
