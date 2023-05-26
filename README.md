@@ -27,6 +27,10 @@ Get the latest build of the script from artifacts in [Actions](https://github.co
 #### MacOS
 ```bash
 brew install ruby
+# Put ruby binary into PATH
+export PATH="$(brew --prefix)/opt/ruby/bin:$PATH"
+echo "export PATH=$(brew --prefix)/opt/ruby/bin:\$PATH" >> ~/.zshrc
+
 gem install bashly
 
 # MacOS bundled with an older bash v3, need to install a newer one which version >= 4

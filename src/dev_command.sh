@@ -1,17 +1,19 @@
 inspect_args
 
 local=${args[--local]}
+
+mount_option=""
+
 if [[ -n $local ]]; then
-    echo "local=" $local
+	echo "Opened a new container with $local mounted to /home/graphscope/graphscope."
+	mount_option="--mount type=bind,source=${local},target=/home/graphscope/graphscope"
 else
-    echo "No local assigned, use default `pwd` to mount as working directory."
-    local=`pwd`
+	echo "No local directory assigned, open a new container without mounting local directory."
 fi
 
-#docker pull graphscope/graphscope-dev
+# docker pull graphscope/graphscope-dev
+REGISTRY="registry.cn-hongkong.aliyuncs.com"
 docker run \
-    -it graphscope/graphscope-dev \
-    /bin/bash
-
-
-    # -v $local:/home/graphscope/workspace 
+	-it \
+	${mount_option} \
+	${REGISTRY}/graphscope/graphscope-dev:latest
