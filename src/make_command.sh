@@ -8,7 +8,7 @@ component=${args[component]}
 log "Making component ${component}"
 
 install_prefix=${args[--install-prefix]}
-experimental_flag=${args[--experimental]}
+storage_type=${args[--storage-type]}
 
 GS_SOURCE_DIR="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
 
@@ -27,8 +27,11 @@ make_analytical() {
 }
 
 make_interactive() {
-    if [[ -n ${experimental_flag} ]]; then
+    if [[ ${storage_type} = "experimental" ]]; then
         cd "${GS_SOURCE_DIR}"/interactive_engine/compiler && make build QUIET_OPT=""
+    elif [[ ${storage_type} = "vineyard" ]]; then
+        cd "${GS_SOURCE_DIR}"/interactive_engine && mvn package -DskipTests -Drust.compile.mode=release -P graphscope,graphscope-assembly
+        cd "${GS_SOURCE_DIR}"/interactive_engine/assembly/target && tar xvzf graphscope.tar.gz
     else
         make interactive
     fi
