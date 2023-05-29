@@ -64,6 +64,7 @@ function test_interactive {
 			export VINEYARD_IPC_SOCKET=/tmp/vineyard.sock
 			vineyardd --socket=${VINEYARD_IPC_SOCKET} --meta=local &
 			# load modern graph
+			export STORE_DATA_PATH="${GS_SOURCE_DIR}"/charts/gie-standalone/data
 			vineyard-graph-loader --config "${GS_SOURCE_DIR}"/charts/gie-standalone/config/v6d_modern_loader.json
 			# start gie executor && frontend
 			export GRAPHSCOPE_HOME="${GS_SOURCE_DIR}"/interactive_engine/assembly/target/graphscope
