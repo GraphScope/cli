@@ -96,7 +96,7 @@ commands:
   args:
   - name: type
     help: test a subset of the codebase, organized by components.
-    allowed: [analytical, analytical-java, interactive, learning, local-e2e, k8s-e2e, groot]
+    allowed: [analytical, analytical-java, interactive, learning, e2e, groot]
 
   flags:
   - long: --local
