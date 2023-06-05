@@ -34,8 +34,8 @@ if [[ -n ${cn} ]]; then
 fi
 
 check_os_compatibility() {
-  if [[ "${OS_PLATFORM}" != *"Ubuntu"* && "${OS_PLATFORM}" != *"CentOS"* && "${OS_PLATFORM}" != *"Darwin"* ]]; then
-    err "The script is only support platforms of Ubuntu/CentOS/macOS"
+  if [[ "${OS_PLATFORM}" != *"Ubuntu"* && "${OS_PLATFORM}" != *"CentOS"* && "${OS_PLATFORM}" != *"Darwin"* && "${OS_PLATFORM}" != *"Aliyun"* ]];  then
+    err "The script is only support platforms of Ubuntu/CentOS/macOS/AliyunOS"
     exit 1
   fi
 
@@ -185,17 +185,22 @@ install_basic_packages_universal() {
   if [[ "${OS_PLATFORM}" == *"Ubuntu"* ]]; then
     ${SUDO} apt-get update -y
     DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC ${SUDO} apt-get install -y ${BASIC_PACKAGES_UBUNTU[*]}
-  elif [[ "${OS_PLATFORM}" == *"CentOS"* ]]; then
+  elif [[ "${OS_PLATFORM}" == *"CentOS"* || "${OS_PLATFORM}" == *"Aliyun"* ]]; then
     if [[ "${OS_VERSION}" -eq "7" ]]; then
       ${SUDO} yum install -y ${BASIC_PACKAGES_CENTOS_7[*]}
       ${SUDO} yum install -y ${ADDITIONAL_PACKAGES_CENTOS_7[*]}
     else
-      sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-      sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-      ${SUDO} yum install -y 'dnf-command(config-manager)'
-      ${SUDO} dnf install -y epel-release
+      if [[ "${OS_PLATFORM}" == *"Aliyun"* ]]; then 
+        ${SUDO} yum install -y 'dnf-command(config-manager)'
+        ${SUDO} dnf install -y epel-release --allowerasing
+      else
+        sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+        sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+        ${SUDO} yum install -y 'dnf-command(config-manager)'
+        ${SUDO} dnf install -y epel-release
+        ${SUDO} dnf config-manager --set-enabled powertools
+      fi
       ${SUDO} dnf config-manager --set-enabled epel
-      ${SUDO} dnf config-manager --set-enabled powertools
       ${SUDO} yum install -y ${BASIC_PACKAGES_CENTOS_8[*]}
       ${SUDO} yum install -y ${ADDITIONAL_PACKAGES_CENTOS_8[*]}
     fi
