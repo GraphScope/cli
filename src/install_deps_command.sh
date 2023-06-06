@@ -117,8 +117,8 @@ _install_java_maven_ubuntu() {
 
 _install_java_maven_centos() {
   if ! command -v javac &>/dev/null; then
-    log "Installing java-1.8.0-openjdk-devel"
-    ${SUDO} yum install java-1.8.0-openjdk-devel -y
+    log "Installing java-11-openjdk-devel"
+    ${SUDO} yum install java-11-openjdk-devel -y
   fi
   if ! command -v mvn &>/dev/null; then
     log "Installing maven"

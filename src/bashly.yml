@@ -9,10 +9,8 @@ footer: |
 environment_variables:
 - name: GRAPHSCOPE_HOME
   help: Installed HOME for GraphScope.
+  default: /opt/graphscope
   required: true
-- name: GRAPHSCOPE_ENV
-  help: One of dev, prod.
-  default: dev
 
 commands:
 
@@ -39,7 +37,7 @@ commands:
 
   examples:
   - gs make analytical
-  - gs make interactive -DskipTests
+  - gs make interactive
   - gs make install 
 
 - name: make-image
