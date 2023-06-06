@@ -53,7 +53,7 @@ jobs:
         fi
         sudo mkdir /opt/graphscope
         sudo chown -R $(id -u):$(id -g) /opt/graphscope
-        bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.14.5
+        bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.15.0
         cat ~/.graphscope_env
 
     - name: Get GraphScope Source
@@ -95,7 +95,7 @@ jobs:
 
       - name: Install dev
         run: |
-          bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.14.5
+          bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.15.0
           cat ~/.graphscope_env
 
       - name: Get GraphScope Source
@@ -123,7 +123,7 @@ jobs:
 
       - name: Install dev
         run: |
-          bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.14.5
+          bash gs/gs install-deps dev --install-prefix /opt/graphscope --v6d-version v0.15.0
           cat ~/.graphscope_env
 
       - name: Get GraphScope Source
