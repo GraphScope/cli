@@ -1,5 +1,13 @@
 get_os_version() {
-  if [ -f /etc/os-release ]; then
+  if [ -f /etc/centos-release ]; then
+    # Older Red Hat, CentOS, Alibaba Cloud Linux etc.
+    PLATFORM=CentOS
+    OS_VERSION=$(sed 's/.* \([0-9]\).*/\1/' < /etc/centos-release)
+    if grep -q "Alibaba Cloud Linux" /etc/centos-release; then
+      PLATFORM="Aliyun_based_on_CentOS"
+      OS_VERSION=$(rpm -E %{rhel})
+    fi
+  elif [ -f /etc/os-release ]; then
     # freedesktop.org and systemd
     . /etc/os-release
     PLATFORM="${NAME}"
@@ -17,10 +25,6 @@ get_os_version() {
     # Older Debian/Ubuntu/etc.
     PLATFORM=Debian
     OS_VERSION=$(cat /etc/debian_version)
-  elif [ -f /etc/centos-release ]; then
-    # Older Red Hat, CentOS, etc.
-    PLATFORM=CentOS
-    OS_VERSION=$(sed 's/.* \([0-9]\).*/\1/' < /etc/centos-release)
   else
     # Fall back to uname, e.g. "Linux <version>", also works for BSD, Darwin, etc.
     PLATFORM=$(uname -s)
